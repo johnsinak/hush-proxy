@@ -1,0 +1,1 @@
+python-wireguard==0.2.2
