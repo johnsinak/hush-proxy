@@ -1,2 +1,2 @@
-# vpn-scheduler
-Code for the VPN scheduler research.
+# flash-proxy
+Code for the flash proxy research.
