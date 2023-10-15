@@ -1,5 +1,5 @@
 from server_threads import *
-from wiregaurd import CONFIG_LOCATION
+from settings import *
 class Proxy:
     def __init__(self, wireguard_endpoint, nat_endpoint, broker_endpoint, migration_endpoint) -> None:
         """
@@ -11,7 +11,7 @@ class Proxy:
         self.migration_endpoint = migration_endpoint
     
     def migrate(self, new_proxy_endpoint):
-        with open(CONFIG_LOCATION, "rb") as f:
+        with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
             data = f.read()
         new_proxy_address = new_proxy_endpoint.split(':')[0]
         new_proxy_socket = new_proxy_endpoint.split(':')[1]
