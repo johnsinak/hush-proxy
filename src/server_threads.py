@@ -36,11 +36,11 @@ class ForwardingServerThread(threading.Thread):
                 client_socket, client_address = dock_socket.accept()
 
                 print (f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
-                server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                server_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
-                way1 = ForwardThread(client_socket, server_socket, "client -> server")
+                nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                nat_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
+                way1 = ForwardThread(client_socket, nat_socket, "client -> server")
                 way1.daemon = True
-                way2 = ForwardThread(server_socket, client_socket, "server -> client")
+                way2 = ForwardThread(nat_socket, client_socket, "server -> client")
                 way2.daemon = True
                 way1.start()
                 way2.start()
