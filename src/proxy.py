@@ -19,6 +19,7 @@ class Proxy:
         s.sendall(data)
 
     def run(self):
+        # TODO: must add migration handler
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         forwarding_server.daemon = 1
         forwarding_server.run()
