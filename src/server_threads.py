@@ -63,7 +63,7 @@ class MigrationHandler(threading.Thread):
             while True:
                 client_socket, client_address = dock_socket.accept()
                 print (f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
-                # TODO: read the file, then close the connection
+                # TODO: read the file, then close the connection, update config file, restart wg
         finally:
             dock_socket.close()
             new_server = MigrationHandler(self.listen_endpoint)
