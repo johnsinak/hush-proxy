@@ -1,0 +1,3 @@
+
+INTERFACE_NAME = "wg0"
+CONFIG_LOCATION = f"/etc/wireguard/{INTERFACE_NAME}"
