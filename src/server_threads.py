@@ -45,6 +45,26 @@ class ForwardingServerThread(threading.Thread):
                 way1.start()
                 way2.start()
         finally:
-            new_server = ForwardingServerThread()
+            new_server = ForwardingServerThread(self.listen_endpoint, self.forward_endpoint)
             new_server.start()
 
+
+class MigrationHandler(threading.Thread):
+    def __init__(self, listen_endpoint: tuple):
+        threading.Thread.__init__(self)
+        self.listen_endpoint = listen_endpoint
+
+    def run(self):
+        try:
+            dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
+            dock_socket.listen(5)
+            print(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+            while True:
+                client_socket, client_address = dock_socket.accept()
+                print (f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
+                # TODO: read the file, then close the connection
+        finally:
+            dock_socket.close()
+            new_server = MigrationHandler(self.listen_endpoint)
+            new_server.start()
