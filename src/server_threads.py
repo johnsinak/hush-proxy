@@ -18,6 +18,7 @@ class ForwardThread(threading.Thread):
             else:
                 self.source_socket.shutdown(socket.SHUT_RD)
                 self.destination_socket.shutdown(socket.SHUT_WR)
+                break
 
 
 class ForwardingServerThread(threading.Thread):
@@ -49,6 +50,27 @@ class ForwardingServerThread(threading.Thread):
             new_server.start()
 
 
+class MigratingAgent(threading.Thread):
+    def __init__(self, client_socket: socket.socket):
+        threading.Thread.__init__(self)
+        self.client_socket = client_socket
+
+    def run(self):
+        data = ' '
+        full_file_data = ''
+        while data:
+            data = self.client_socket.recv(1024)
+            print (f"==== recieved data")
+            if data:
+                full_file_data += data
+            else:
+                self.source_socket.shutdown(socket.SHUT_RD)
+                self.destination_socket.shutdown(socket.SHUT_WR)
+                break
+        print (f"==== Done! full migration data:\n{full_file_data}")
+        # TODO: read the file, then close the connection, update config file, restart wg
+
+
 class MigrationHandler(threading.Thread):
     def __init__(self, listen_endpoint: tuple):
         threading.Thread.__init__(self)
@@ -62,8 +84,8 @@ class MigrationHandler(threading.Thread):
             print(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
             while True:
                 client_socket, client_address = dock_socket.accept()
-                print (f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
-                # TODO: read the file, then close the connection, update config file, restart wg
+                print (f"==== migration request from {client_address}:{self.listen_endpoint[1]}")
+                way2 = ForwardThread(client_socket)
         finally:
             dock_socket.close()
             new_server = MigrationHandler(self.listen_endpoint)
