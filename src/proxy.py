@@ -3,7 +3,7 @@ from settings import *
 class Proxy:
     def __init__(self, wireguard_endpoint, nat_endpoint, broker_endpoint, migration_endpoint) -> None:
         """
-        end points are tuples of: (address, port)
+        endpoints are tuples of: (address, port)
         """
         self.wireguard_endpoint = wireguard_endpoint
         self.nat_endpoint = nat_endpoint
@@ -11,6 +11,7 @@ class Proxy:
         self.migration_endpoint = migration_endpoint
     
     def migrate(self, new_proxy_endpoint):
+        # migrate address:port
         with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
             data = f.read()
         new_proxy_address = new_proxy_endpoint.split(':')[0]
@@ -20,7 +21,6 @@ class Proxy:
         s.sendall(data)
 
     def run(self):
-        # TODO: must add migration handler
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)
         forwarding_server.daemon = 1
