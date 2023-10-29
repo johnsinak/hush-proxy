@@ -14,8 +14,8 @@ class Proxy:
         # migrate address:port
         with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
             data = f.read()
-        new_proxy_address = new_proxy_endpoint.split(':')[0]
-        new_proxy_socket = new_proxy_endpoint.split(':')[1]
+        new_proxy_address, new_proxy_socket = new_proxy_endpoint.split(':')
+        new_proxy_socket = int(new_proxy_socket)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((new_proxy_address, new_proxy_socket))
         s.sendall(data)
@@ -23,13 +23,15 @@ class Proxy:
     def run(self):
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)
-        forwarding_server.daemon = 1
-        migration_handler.daemon = 1
-        forwarding_server.run()
-        migration_handler.run()
+        print("here?")
+        migration_handler.start()
+        print("here?")
+        forwarding_server.start()
+        print("here?")
 
         while True:
             # This will eventually listen to the broker instead of stdin
+            print("here?")
             command = input("> ").strip().lower().split()
 
             if (command[0] == "migrate" and len(command) > 1):

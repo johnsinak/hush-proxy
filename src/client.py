@@ -31,5 +31,6 @@ def tcp_client(host, port):
 
 if __name__ == "__main__":
     host, port = input('enter server <address>:<port>\n').strip().split(':')
+    port = int(port)
 
     tcp_client(host, port)
