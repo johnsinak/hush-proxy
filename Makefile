@@ -6,6 +6,10 @@ all: full
 full:
 	wg --version
 
+build:
+	docker build -t wg-peer .
+	docker build -t nat-server -f NATDockerfile .
+
 keys:
 	wg genkey | tee ${KEYS_DIR}/peer1/privatekey | wg pubkey > ${KEYS_DIR}/peer1/publickey
 	wg genkey | tee ${KEYS_DIR}/peer2/privatekey | wg pubkey > ${KEYS_DIR}/peer2/publickey
