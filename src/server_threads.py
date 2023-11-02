@@ -1,6 +1,8 @@
 import threading
 import socket
 
+client_addresses = []
+
 class ForwardThread(threading.Thread):
     def __init__(self, source_socket: socket.socket, destination_socket: socket.socket, description: str):
         threading.Thread.__init__(self)
@@ -29,6 +31,7 @@ class ForwardingServerThread(threading.Thread):
         self.forward_endpoint = forward_endpoint
 
     def run(self):
+        global client_addresses
         try:
             dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
@@ -36,6 +39,7 @@ class ForwardingServerThread(threading.Thread):
             print(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
             while True:
                 client_socket, client_address = dock_socket.accept()
+                client_addresses.append(client_address)
 
                 print (f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
                 nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

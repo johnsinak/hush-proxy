@@ -1,5 +1,7 @@
 from server_threads import *
 from settings import *
+
+
 class Proxy:
     def __init__(self, wireguard_endpoint, nat_endpoint, broker_endpoint, migration_endpoint) -> None:
         """
@@ -12,6 +14,7 @@ class Proxy:
     
     def migrate(self, new_proxy_endpoint):
         # migrate address:port
+        global client_addresses
         with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
             data = f.read()
         new_proxy_address, new_proxy_socket = new_proxy_endpoint.split(':')
@@ -19,6 +22,15 @@ class Proxy:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((new_proxy_address, new_proxy_socket))
         s.sendall(data)
+
+        print(f'sending migration notice to {len(client_addresses)} clients')
+        print(client_addresses)
+        for address in client_addresses:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect((address[0], 8089))
+            s.sendall(f"migrate {new_proxy_endpoint}".encode())
+            s.close()
+
 
     def run(self):
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
