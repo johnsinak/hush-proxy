@@ -7,13 +7,15 @@ full: build
 	wg --version 
 
 restart: dockerrm build
-	docker run -dit --cap-add=NET_ADMIN --name=peer1 wg-peer
-	docker run -dit --cap-add=NET_ADMIN --name=server wg-peer
-	docker run -dit --cap-add=NET_ADMIN --name=server2 wg-peer
+	docker run -dit --cap-add=NET_ADMIN --name=peer1 wg-peer1
+	docker run -dit --cap-add=NET_ADMIN --name=server wg-server
+	docker run -dit --cap-add=NET_ADMIN --name=server2 wg-server2
 
 
 build:
-	docker build -t wg-peer .
+	docker build -t wg-peer1 -f Peer1Dockerfile .
+	docker build -t wg-server -f ServerDockerfile .
+	docker build -t wg-server2 -f Server2Dockerfile .
 	docker build -t nat-server -f NATDockerfile .
 
 keys:
@@ -24,7 +26,14 @@ keys:
 
 ready:
 	cp ${KEYS_DIR}/${name}/wg0.conf etc/wireguard/
+
+upc:
 	wg-quick up wg0
+	python3 src/client.py
+
+ups:
+	wg-quick up wg0
+	python3 src/client.py
 
 mk:
 	mkdir ./${BUILD_DIR}
