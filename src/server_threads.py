@@ -73,7 +73,7 @@ class MigratingAgent(threading.Thread):
                 break
         print (f"==== Done! full migration data:\n{full_file_data}")
         migration_string = full_file_data.decode()
-        peers = data.split('Peer')
+        peers = migration_string.split('Peer')
         if len(peers) == 1:
             print("ERROR: Migrated data was empty!")
             return
@@ -84,12 +84,12 @@ class MigratingAgent(threading.Thread):
             allowed_ips = ''
             for line in lines_in_peer:
                 if 'PublicKey' in line:
-                    public_key = line.split('=')[1]
+                    public_key = line[line.find('=') + 1:].strip()
                 if 'AllowedIPs' in line:
-                    allowed_ips = line.split('=')[1]
+                    allowed_ips = line[line.find('=') + 1:].strip()
             print(f'INFO: adding {public_key}|{allowed_ips}')
-            subprocess.run(f'wg set wg0 peer "{public_key}" allowed-ips {allowed_ips}')
-            subprocess.run(f'ip -4 route add {allowed_ips} dev wg0')
+            subprocess.run(f'wg set wg0 peer "{public_key}" allowed-ips {allowed_ips}', shell=True)
+            subprocess.run(f'ip -4 route add {allowed_ips} dev wg0', shell=True)
             print("INFO: migrated peer")
 
 

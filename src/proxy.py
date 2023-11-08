@@ -46,7 +46,10 @@ class Proxy:
             print("here?")
             command = input("> ").strip().lower().split()
 
-            if (command[0] == "migrate" and len(command) > 1):
-                self.migrate(command[1])
+            if (command[0] == "migrate"):
+                if len(command) > 1:
+                    self.migrate(command[1])
+                else:
+                    self.migrate('172.17.0.4:8089')
             else:
                 print("ERROR: invalid command")
