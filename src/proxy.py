@@ -28,7 +28,7 @@ class Proxy:
         for address in client_addresses:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((address[0], 8089))
-            s.sendall(f"{new_proxy_endpoint}".encode())
+            s.sendall(f"{new_proxy_address}:{WIREGUARD_PORT}".encode())
             s.close()
 
 

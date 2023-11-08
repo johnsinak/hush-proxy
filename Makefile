@@ -33,12 +33,15 @@ upc:
 
 ups:
 	wg-quick up wg0
-	python3 src/client.py
+	python3 src/main.py
 
 mk:
 	mkdir ./${BUILD_DIR}
 
 dockerrm:
+	-docker stop server
+	-docker stop peer1
+	-docker stop server2
 	-docker rm server peer1 server2
 
 rename:
