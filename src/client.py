@@ -76,6 +76,29 @@ def tcp_client(host, port):
         client_socket.close()
         print("Connection closed.")
 
+def continuous_test(host, port):
+    try:
+        global client_socket
+        client_socket.connect((host, port))
+        print(f"Connected to {host}:{port}")
+
+        while True:
+            message = input("Enter a message (or 'exit' to quit): ")
+            if message.lower() == 'exit':
+                break
+
+            client_socket.send(message.encode('utf-8'))
+
+            data = client_socket.recv(1024)
+            print(f"Received from server: {data.decode('utf-8')}")
+
+    except ConnectionRefusedError:
+        print("Connection to the server failed. Make sure the server is running.")
+
+    finally:
+        client_socket.close()
+        print("Connection closed.")
+
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     migration_endpoint = ("10.27.0.2", 8089)
@@ -85,5 +108,8 @@ if __name__ == "__main__":
     # port = int(port)
     host = '10.27.0.20'
     port = 8088
-    input('start? ')
-    tcp_client(host, port)
+    choice = input('start? ').strip()
+    if choice == '0':
+        pass
+    else:
+        tcp_client(host, port)
