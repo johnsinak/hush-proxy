@@ -1,5 +1,7 @@
 import threading
 import socket
+import subprocess
+
 
 client_addresses = []
 
@@ -70,7 +72,25 @@ class MigratingAgent(threading.Thread):
                 self.client_socket.shutdown(socket.SHUT_RD)
                 break
         print (f"==== Done! full migration data:\n{full_file_data}")
-        # TODO: read the file, then close the connection, update config file, restart wg
+        migration_string = full_file_data.decode()
+        peers = data.split('Peer')
+        if len(peers) == 1:
+            print("ERROR: Migrated data was empty!")
+            return
+        peers = peers[1:]
+        for peer in peers:
+            lines_in_peer = peer.split('\n')
+            public_key = ''
+            allowed_ips = ''
+            for line in lines_in_peer:
+                if 'PublicKey' in line:
+                    public_key = line.split('=')[1]
+                if 'AllowedIPs' in line:
+                    allowed_ips = line.split('=')[1]
+            print(f'INFO: adding {public_key}|{allowed_ips}')
+            subprocess.run(f'wg set wg0 peer "{public_key}" allowed-ips {allowed_ips}')
+            subprocess.run(f'ip -4 route add {allowed_ips} dev wg0')
+            print("INFO: migrated peer")
 
 
 class MigrationHandler(threading.Thread):
