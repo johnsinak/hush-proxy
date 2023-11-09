@@ -11,6 +11,12 @@ restart: dockerrm build
 	docker run -dit --cap-add=NET_ADMIN --name=server wg-server
 	docker run -dit --cap-add=NET_ADMIN --name=server2 wg-server2
 	docker run -dit --cap-add=NET_ADMIN --name=server3 wg-server2
+
+brestart: dockerrm build
+	docker run -dit --cap-add=NET_ADMIN --name=peer1 wg-peer1
+	docker run -dit --cap-add=NET_ADMIN --name=server wg-server
+	docker run -dit --cap-add=NET_ADMIN --name=server2 wg-server2
+	docker run -dit --cap-add=NET_ADMIN --name=server3 wg-server2
 	docker run -dit --cap-add=NET_ADMIN --name=server4 wg-server2
 	docker run -dit --cap-add=NET_ADMIN --name=server5 wg-server2
 	docker run -dit --cap-add=NET_ADMIN --name=server6 wg-server2
@@ -50,6 +56,7 @@ dockerrm:
 	-docker stop server
 	-docker stop peer1
 	-docker stop server2
+	-docker stop server3
 	-docker rm server peer1 server2 server3 server4 server5 server6 
 
 rename:

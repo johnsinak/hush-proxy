@@ -1,7 +1,7 @@
 import threading
 import socket
 import subprocess
-
+from settings import WIREGUARD_CONFIG_LOCATION
 
 client_addresses = []
 client_sockets = []
@@ -19,30 +19,33 @@ class ForwardThread(threading.Thread):
 
     def run(self):
         data = ' '
-        while data:
-            data = self.source_socket.recv(1024)
-            print (f"==== {self.description}: {data}")
-            if data:
-                try:
-                    self.destination_socket.sendall(data)
-                except:
-                    print('connection closed')
+        try:
+            while data:
+                data = self.source_socket.recv(1024)
+                # print (f"==== {self.description}: {data}")
+                if data:
                     try:
+                        self.destination_socket.sendall(data)
+                    except:
+                        print('connection closed')
+                        try:
+                            self.destination_socket.shutdown(socket.SHUT_WR)
+                        except:
+                            pass
+                        try:
+                            self.source_socket.shutdown(socket.SHUT_WR)
+                        except:
+                            pass
+                        break
+                else:
+                    try:
+                        self.source_socket.shutdown(socket.SHUT_RD)
                         self.destination_socket.shutdown(socket.SHUT_WR)
                     except:
-                        pass
-                    try:
-                        self.source_socket.shutdown(socket.SHUT_WR)
-                    except:
-                        pass
-                    break
-            else:
-                try:
-                    self.source_socket.shutdown(socket.SHUT_RD)
-                    self.destination_socket.shutdown(socket.SHUT_WR)
-                except:
-                    print('connection closed')
-                    break
+                        print('connection closed')
+                        break
+        except:
+            print('connection closed')
 
 
 class ForwardingServerThread(threading.Thread):
@@ -98,6 +101,8 @@ class MigratingAgent(threading.Thread):
             print("ERROR: Migrated data was empty!")
             return
         peers = peers[1:]
+
+        # Update wireguard w0
         for peer in peers:
             lines_in_peer = peer.split('\n')
             public_key = ''
@@ -107,10 +112,19 @@ class MigratingAgent(threading.Thread):
                     public_key = line[line.find('=') + 1:].strip()
                 if 'AllowedIPs' in line:
                     allowed_ips = line[line.find('=') + 1:].strip()
+
             print(f'INFO: adding {public_key}|{allowed_ips}')
             subprocess.run(f'wg set wg0 peer "{public_key}" allowed-ips {allowed_ips}', shell=True)
             subprocess.run(f'ip -4 route add {allowed_ips} dev wg0', shell=True)
-            print("INFO: migrated peer")
+            print("SUCCESS: migrated peer")
+
+        # Update config file
+        new_peers = ['[']
+        new_peers.extend(peers)
+        new_peers_string = '\n' + 'Peer'.join(new_peers)
+        with open(WIREGUARD_CONFIG_LOCATION, 'a') as f:
+            f.write(new_peers_string)
+        print("SUCCESS: updated config file")
 
 
 class MigrationHandler(threading.Thread):
