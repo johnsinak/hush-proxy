@@ -10,7 +10,15 @@ restart: dockerrm build
 	docker run -dit --cap-add=NET_ADMIN --name=peer1 wg-peer1
 	docker run -dit --cap-add=NET_ADMIN --name=server wg-server
 	docker run -dit --cap-add=NET_ADMIN --name=server2 wg-server2
+	docker run -dit --cap-add=NET_ADMIN --name=server3 wg-server2
+	docker run -dit --cap-add=NET_ADMIN --name=server4 wg-server2
+	docker run -dit --cap-add=NET_ADMIN --name=server5 wg-server2
+	docker run -dit --cap-add=NET_ADMIN --name=server6 wg-server2
 
+srestart: dockerrm
+	docker run -dit --cap-add=NET_ADMIN --name=peer1 wg-peer1
+	docker run -dit --cap-add=NET_ADMIN --name=server wg-server
+	docker run -dit --cap-add=NET_ADMIN --name=server2 wg-server2
 
 build:
 	docker build -t wg-peer1 -f Peer1Dockerfile .
@@ -42,7 +50,7 @@ dockerrm:
 	-docker stop server
 	-docker stop peer1
 	-docker stop server2
-	-docker rm server peer1 server2
+	-docker rm server peer1 server2 server3 server4 server5 server6 
 
 rename:
 	$(eval CC = clang++ -std=c++11 -pthread)
