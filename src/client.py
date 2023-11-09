@@ -2,6 +2,7 @@ import socket
 import threading
 from settings import *
 import subprocess
+from time import sleep, time
 
 class MigrationHandler(threading.Thread):
     def __init__(self, listen_endpoint: tuple):
@@ -76,28 +77,43 @@ def tcp_client(host, port):
         client_socket.close()
         print("Connection closed.")
 
-def continuous_test(host, port):
-    try:
-        global client_socket
-        client_socket.connect((host, port))
-        print(f"Connected to {host}:{port}")
+def continuous_test(host, port, total_packets=25000):
+    last_ack = -1
+    global client_socket
+    client_socket.connect((host, port))
+    print(f"Connected to {host}:{port}")
+    is_open = True
+    start = time()
+    while True:
+        if not last_ack < total_packets: break
+        try:
+            while last_ack < total_packets:
+                message = str(last_ack + 1)
+                client_socket.send(message.encode('utf-8'))
 
-        while True:
-            message = input("Enter a message (or 'exit' to quit): ")
-            if message.lower() == 'exit':
-                break
+                data = client_socket.recv(1024)
+                try:
+                    last_ack = int(data.decode())
+                    is_open = True
+                    print(f"Received: {data.decode('utf-8')}")
+                except:
+                    print('Received: EOF')
+                    break
+        except ConnectionRefusedError:
+            print("Connection to the server failed. Make sure the server is running.")
 
-            client_socket.send(message.encode('utf-8'))
-
-            data = client_socket.recv(1024)
-            print(f"Received from server: {data.decode('utf-8')}")
-
-    except ConnectionRefusedError:
-        print("Connection to the server failed. Make sure the server is running.")
-
-    finally:
-        client_socket.close()
-        print("Connection closed.")
+        except ConnectionResetError:
+            print('migrating...')
+        
+        except:
+            print('the pipe is not ready yet, sleeping for 0.001 sec')
+            sleep(0.001)
+        finally:
+            if is_open:
+                client_socket.close()
+                is_open = False
+                print("Connection closed.")
+    print(f'test is done, total time was: {time() - start} secs')
 
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -110,6 +126,6 @@ if __name__ == "__main__":
     port = 8088
     choice = input('start? ').strip()
     if choice == '0':
-        pass
+        continuous_test(host, port)
     else:
         tcp_client(host, port)
