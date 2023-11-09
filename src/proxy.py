@@ -7,6 +7,7 @@ class Proxy:
         """
         endpoints are tuples of: (address, port)
         """
+        self.my_number = int(socket.gethostbyname(socket.gethostname()).split('.')[-1])
         self.wireguard_endpoint = wireguard_endpoint
         self.nat_endpoint = nat_endpoint
         self.broker_endpoint = broker_endpoint
@@ -14,7 +15,7 @@ class Proxy:
     
     def migrate(self, new_proxy_endpoint):
         # migrate address:port
-        global client_addresses
+        global client_addresses, client_sockets, nat_sockets
         with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
             data = f.read()
         new_proxy_address, new_proxy_socket = new_proxy_endpoint.split(':')
@@ -24,13 +25,19 @@ class Proxy:
         s.sendall(data)
 
         print(f'sending migration notice to {len(client_addresses)} clients')
-        print(client_addresses)
-        for address in client_addresses:
+        for i in range(len(client_addresses)):
+            address = client_addresses[i]
+            cli_sock = client_sockets[i]
+            dest_sock = nat_sockets[i]
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((address[0], 8089))
             s.sendall(f"{new_proxy_address}:{WIREGUARD_PORT}".encode())
             s.close()
-
+            cli_sock.close()
+            dest_sock.close()
+        client_addresses = []
+        client_sockets = []
+        nat_sockets = []
 
     def run(self):
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
@@ -50,6 +57,6 @@ class Proxy:
                 if len(command) > 1:
                     self.migrate(command[1])
                 else:
-                    self.migrate('172.17.0.4:8089')
+                    self.migrate(f'172.17.0.{self.my_number + 1}:8089')
             else:
                 print("ERROR: invalid command")

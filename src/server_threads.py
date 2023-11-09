@@ -4,6 +4,8 @@ import subprocess
 
 
 client_addresses = []
+client_sockets = []
+nat_sockets = []
 
 class ForwardThread(threading.Thread):
     def __init__(self, source_socket: socket.socket, destination_socket: socket.socket, description: str):
@@ -11,6 +13,9 @@ class ForwardThread(threading.Thread):
         self.source_socket = source_socket
         self.destination_socket = destination_socket
         self.description = description
+        global client_sockets, nat_sockets
+        client_sockets.append(source_socket)
+        nat_sockets.append(destination_socket)
 
     def run(self):
         data = ' '
@@ -18,11 +23,26 @@ class ForwardThread(threading.Thread):
             data = self.source_socket.recv(1024)
             print (f"==== {self.description}: {data}")
             if data:
-                self.destination_socket.sendall(data)
+                try:
+                    self.destination_socket.sendall(data)
+                except:
+                    print('connection closed')
+                    try:
+                        self.destination_socket.shutdown(socket.SHUT_WR)
+                    except:
+                        pass
+                    try:
+                        self.source_socket.shutdown(socket.SHUT_WR)
+                    except:
+                        pass
+                    break
             else:
-                self.source_socket.shutdown(socket.SHUT_RD)
-                self.destination_socket.shutdown(socket.SHUT_WR)
-                break
+                try:
+                    self.source_socket.shutdown(socket.SHUT_RD)
+                    self.destination_socket.shutdown(socket.SHUT_WR)
+                except:
+                    print('connection closed')
+                    break
 
 
 class ForwardingServerThread(threading.Thread):
