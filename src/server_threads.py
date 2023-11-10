@@ -22,7 +22,7 @@ class ForwardThread(threading.Thread):
         try:
             while data:
                 data = self.source_socket.recv(1024)
-                # print (f"==== {self.description}: {data}")
+                print (f"==== {self.description}: {data}")
                 if data:
                     try:
                         self.destination_socket.sendall(data)
