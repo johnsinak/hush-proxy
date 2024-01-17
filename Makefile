@@ -47,7 +47,7 @@ upc:
 
 ups:
 	wg-quick up wg0
-	python3 src/main.py
+	python3 src/server.py
 
 mk:
 	mkdir ./${BUILD_DIR}
