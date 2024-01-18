@@ -17,7 +17,6 @@ class MigrationHandler(threading.Thread):
         
         while True:
             # TODO: Clean code
-
             mig_socket, mig_address = dock_socket.accept()
             print (f"==== migration request from {mig_address}:{self.listen_endpoint[1]}")
             data = mig_socket.recv(1024)
@@ -51,7 +50,6 @@ class MigrationHandler(threading.Thread):
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((host, port))
             print(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
-            
 
 
 def tcp_client(host, port):
@@ -76,6 +74,7 @@ def tcp_client(host, port):
     finally:
         client_socket.close()
         print("Connection closed.")
+
 
 def continuous_test(host, port, total_packets=25000):
     last_ack = -1
