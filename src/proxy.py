@@ -3,7 +3,7 @@ from settings import *
 
 
 class Proxy:
-    def __init__(self, wireguard_endpoint, nat_endpoint, broker_endpoint, migration_endpoint) -> None:
+    def __init__(self, wireguard_endpoint, nat_endpoint, broker_endpoint, migration_endpoint, polling_endpoint) -> None:
         """
         endpoints are tuples of: (address, port)
         """
@@ -12,6 +12,7 @@ class Proxy:
         self.nat_endpoint = nat_endpoint
         self.broker_endpoint = broker_endpoint
         self.migration_endpoint = migration_endpoint
+        self.polling_endpoint = polling_endpoint
     
     def migrate(self, new_proxy_endpoint):
         # migrate address:port
@@ -42,11 +43,12 @@ class Proxy:
     def run(self):
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)
-        print("here?")
+        polling_handler = PollingHandler(self.polling_endpoint)
+        polling_handler.start()
         migration_handler.start()
-        print("here?")
         forwarding_server.start()
-        print("here?")
+
+        # TODO: Complete this
 
         while True:
             # This will eventually listen to the broker instead of stdin

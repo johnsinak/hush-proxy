@@ -2,6 +2,9 @@ import threading
 import socket
 import subprocess
 from settings import WIREGUARD_CONFIG_LOCATION
+import psutil
+from time import sleep
+import json
 
 client_addresses = []
 client_sockets = []
@@ -73,9 +76,9 @@ class ForwardingServerThread(threading.Thread):
                 way2 = ForwardThread(nat_socket, client_socket, "server -> client")
                 way1.start()
                 way2.start()
-        finally:
-            new_server = ForwardingServerThread(self.listen_endpoint, self.forward_endpoint)
-            new_server.start()
+        except Exception as e:
+            print('ERROR: a fatal error has happened')
+            print(e)
 
 
 class MigratingAgent(threading.Thread):
@@ -144,6 +147,48 @@ class MigrationHandler(threading.Thread):
                 print (f"==== migration request from {client_address}:{self.listen_endpoint[1]}")
                 agent = MigratingAgent(client_socket)
                 agent.start()
+        finally:
+            dock_socket.close()
+            new_server = MigrationHandler(self.listen_endpoint)
+            new_server.start()
+
+
+def calculate_network_throughput(interval=0.01):
+    net_io_before = psutil.net_io_counters()
+    sleep(interval)
+    net_io_after = psutil.net_io_counters()
+    sent_throughput = (net_io_after.bytes_sent - net_io_before.bytes_sent) / interval
+
+    return sent_throughput
+
+class PollingHandler(threading.Thread):
+    def __init__(self, listen_endpoint: tuple):
+        threading.Thread.__init__(self)
+        self.listen_endpoint = listen_endpoint
+
+    def run(self):
+        try:
+            print(f"==== polling handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+            dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
+            dock_socket.listen(5)
+            
+            while True:
+                poller_socket, poller_address = dock_socket.accept()
+                print (f"==== polling request from {poller_address}:{self.listen_endpoint[1]}")
+                data = self.poller_socket.recv(1024)
+
+                cpu_utilization = psutil.cpu_percent(interval=0.01)
+                throughput = calculate_network_throughput()
+                report = {}
+                report['utility'] = cpu_utilization
+                report['throughput'] = throughput
+                report['connected_clients'] = client_addresses
+
+                message_to_send = json.dumps(report)
+                poller_socket.send(message_to_send.encode())
+                poller_socket.close()
+                
         finally:
             dock_socket.close()
             new_server = MigrationHandler(self.listen_endpoint)
