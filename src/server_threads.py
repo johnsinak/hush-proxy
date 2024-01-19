@@ -186,7 +186,7 @@ class PollingHandler(threading.Thread):
                 report['connected_clients'] = client_addresses
 
                 message_to_send = json.dumps(report)
-                poller_socket.send(message_to_send.encode())
+                poller_socket.sendall(message_to_send.encode())
                 poller_socket.close()
                 
         finally:

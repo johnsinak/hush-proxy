@@ -14,13 +14,13 @@ class Proxy:
         self.migration_endpoint = migration_endpoint
         self.polling_endpoint = polling_endpoint
     
-    def migrate(self, new_proxy_endpoint):
-        # migrate address:port
+    def migrate(self, new_proxy_ip):
+        # migrate address
         global client_addresses, client_sockets, nat_sockets
         with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
             data = f.read()
-        new_proxy_address, new_proxy_socket = new_proxy_endpoint.split(':')
-        new_proxy_socket = int(new_proxy_socket)
+        new_proxy_address = new_proxy_ip
+        new_proxy_socket = MIGRATION_PORT
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect((new_proxy_address, new_proxy_socket))
         s.sendall(data)
@@ -31,7 +31,7 @@ class Proxy:
             cli_sock = client_sockets[i]
             dest_sock = nat_sockets[i]
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.connect((address[0], 8089))
+            s.connect((address[0], MIGRATION_PORT))
             s.sendall(f"{new_proxy_address}:{WIREGUARD_PORT}".encode())
             s.close()
             cli_sock.close()
@@ -48,12 +48,15 @@ class Proxy:
         migration_handler.start()
         forwarding_server.start()
 
-        # TODO: Complete this
+        dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        dock_socket.bind((self.broker_endpoint[0], self.broker_endpoint[1]))
+        dock_socket.listen(5)
 
         while True:
-            # This will eventually listen to the broker instead of stdin
-            print("here?")
-            command = input("> ").strip().lower().split()
+            broker_socket, broker_address = dock_socket.accept()
+            data = broker_socket.recv(1024)
+            
+            command = data.decode().strip().lower().split()
 
             if (command[0] == "migrate"):
                 if len(command) > 1:
@@ -61,4 +64,5 @@ class Proxy:
                 else:
                     self.migrate(f'172.17.0.{self.my_number + 1}:8089')
             else:
-                print("ERROR: invalid command")
+                broker_socket.send("ERROR: invalid command".encode())
+            broker_socket.close()

@@ -16,7 +16,6 @@ class MigrationHandler(threading.Thread):
         dock_socket.listen(5)
         
         while True:
-            # TODO: Clean code
             mig_socket, mig_address = dock_socket.accept()
             print (f"==== migration request from {mig_address}:{self.listen_endpoint[1]}")
             data = mig_socket.recv(1024)
