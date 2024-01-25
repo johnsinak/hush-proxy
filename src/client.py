@@ -1,6 +1,6 @@
 import socket
 import threading
-from .settings import *
+from settings import *
 import subprocess
 from time import sleep, time
 

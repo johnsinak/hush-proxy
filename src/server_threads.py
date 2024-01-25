@@ -1,7 +1,7 @@
 import threading
 import socket
 import subprocess
-from .settings import WIREGUARD_CONFIG_LOCATION
+from settings import WIREGUARD_CONFIG_LOCATION
 import psutil
 from time import sleep
 import json
