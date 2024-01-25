@@ -25,7 +25,6 @@ class ForwardThread(threading.Thread):
         try:
             while data:
                 data = self.source_socket.recv(1024)
-                print (f"==== {self.description}: {data}")
                 if data:
                     try:
                         self.destination_socket.sendall(data)
@@ -89,9 +88,9 @@ class MigratingAgent(threading.Thread):
     def run(self):
         data = ' '
         full_file_data = b''
+        print (f"==== recieving migration data")
         while data:
             data = self.client_socket.recv(1024)
-            print (f"==== recieved data")
             if data:
                 full_file_data += data
             else:

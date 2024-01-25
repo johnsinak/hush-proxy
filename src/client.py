@@ -54,7 +54,7 @@ class MigrationHandler(threading.Thread):
 
 def run_script_in_background(script_path='../scripts/measure.sh'):
     try:
-        process = subprocess.Popen(['bash', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, background=True)
+        process = subprocess.Popen(['bash', script_path])
 
         print(f"Shell script '{script_path}' is running in the background.")
         return process
@@ -134,8 +134,7 @@ def continuous_test(host, port, test_duration=300):
                 is_open = False
                 print("Connection closed.")
     print(f'test is done, total time was: {time() - start} secs')
-    output, error = process.communicate()
-    print(f'output:\n{output.decode()}')
+    process.terminate()
 
 
 if __name__ == "__main__":
