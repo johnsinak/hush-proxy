@@ -1,6 +1,20 @@
 from server_threads import *
 from settings import *
+import requests
 
+def get_public_ip():
+    try:
+        response = requests.get('https://httpbin.org/ip')
+        if response.status_code == 200:
+            public_ip = response.json()['origin']
+            return public_ip
+        else:
+            print(f"Failed to retrieve public IP. Status code: {response.status_code}")
+
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+
+    return None
 
 class Proxy:
     def __init__(self, wireguard_endpoint, nat_endpoint, broker_endpoint, migration_endpoint, polling_endpoint) -> None:
@@ -41,6 +55,9 @@ class Proxy:
         nat_sockets = []
 
     def run(self):
+        ip = get_public_ip()
+        print(f'my endpoint is: {ip}:51820')
+
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)
         polling_handler = PollingHandler(self.polling_endpoint)

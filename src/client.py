@@ -51,6 +51,17 @@ class MigrationHandler(threading.Thread):
             print(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
 
 
+def run_script_in_background(script_path='../scripts/measure.sh'):
+    try:
+        process = subprocess.Popen(['bash', script_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE, background=True)
+
+        print(f"Shell script '{script_path}' is running in the background.")
+        return process
+    except Exception as e:
+        print(f"Error running the shell script: {e}")
+        return None
+
+
 def tcp_client(host, port):
     try:
         global client_socket
@@ -75,17 +86,18 @@ def tcp_client(host, port):
         print("Connection closed.")
 
 
-def continuous_test(host, port, total_packets=25000):
+def continuous_test(host, port, test_duration=300):
     last_ack = -1
     global client_socket
     client_socket.connect((host, port))
     print(f"Connected to {host}:{port}")
     is_open = True
     start = time()
-    while True:
-        if not last_ack < total_packets: break
+    process = run_script_in_background()
+
+    while time() - start < test_duration:
         try:
-            while last_ack < total_packets:
+            while time() - start < test_duration:
                 message = str(last_ack + 1)
                 client_socket.send(message.encode('utf-8'))
 
@@ -93,7 +105,7 @@ def continuous_test(host, port, total_packets=25000):
                 try:
                     last_ack = int(data.decode())
                     is_open = True
-                    print(f"Received: {data.decode('utf-8')}")
+                    # print(f"Received: {data.decode('utf-8')}")
                 except:
                     print('Received: EOF')
                     break
@@ -112,9 +124,13 @@ def continuous_test(host, port, total_packets=25000):
                 is_open = False
                 print("Connection closed.")
     print(f'test is done, total time was: {time() - start} secs')
+    output, error = process.communicate()
+    print(f'output:\n{output.decode()}')
+
 
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #TODO: fix this
     migration_endpoint = ("10.27.0.2", 8089)
     handler = MigrationHandler(listen_endpoint=migration_endpoint)
     handler.start()

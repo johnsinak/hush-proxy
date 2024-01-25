@@ -22,7 +22,7 @@ def echo_server(host, port):
     server_socket.bind((host, port))
     server_socket.listen(5)
 
-    print(f"Echo server is listening on {host}:{port}")
+    print(f"yes")
 
     while True:
         client_socket, client_address = server_socket.accept()
@@ -51,7 +51,7 @@ def nat_server(host, port):
     server_socket.bind((host, port))
     server_socket.listen(5)
 
-    print(f"Nat server is listening on {host}:{port}")
+    print(f"yes")
 
     while True:
         client_socket, client_address = server_socket.accept()
@@ -61,8 +61,26 @@ def nat_server(host, port):
         thr.start()
 
 
+def get_public_ip():
+    try:
+        response = requests.get('https://httpbin.org/ip')
+
+        if response.status_code == 200:
+            public_ip = response.json()['origin']
+            return public_ip
+        else:
+            print(f"Failed to retrieve public IP. Status code: {response.status_code}")
+
+    except requests.RequestException as e:
+        print(f"Request error: {e}")
+
+    return None
+
+
 if __name__ == "__main__":
     host = "0.0.0.0"
-    port = 8000  
+    port = 8000
+    pub_ip = get_public_ip()
+    print(f"Nat server is listening on {pub_ip}:{port}")
 
     nat_server(host, port)
