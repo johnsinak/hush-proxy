@@ -1,5 +1,5 @@
-from server_threads import *
-from settings import *
+from .server_threads import *
+from .settings import *
 import requests
 
 def get_public_ip():

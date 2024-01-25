@@ -39,7 +39,7 @@ keys:
 	wg genkey | tee ${KEYS_DIR}/server2/privatekey | wg pubkey > ${KEYS_DIR}/server2/publickey
 
 ready:
-	cp ${KEYS_DIR}/${name}/wg0.conf etc/wireguard/
+	cp ${KEYS_DIR}/${name}/wg0.conf /etc/wireguard/
 
 upc:
 	wg-quick up wg0
