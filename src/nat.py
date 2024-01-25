@@ -39,16 +39,11 @@ class NATThread(threading.Thread):
 
     def run(self):
         data = self.client_socket.recv(1024)
-        
+        url = data.decode()
+        response = requests.get(url)
 
-        while data:
-            url = data.decode()
-            response = requests.get(url)
+        self.client_socket.sendall(response.text.encode())
 
-            self.client_socket.sendall(response.text.encode())
-            data = self.client_socket.recv(1024)
-        
-        print(f"Connection from {self.client_address} closed.")
         self.client_socket.close()
 
 def nat_server(host, port):
