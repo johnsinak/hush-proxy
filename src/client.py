@@ -3,6 +3,7 @@ import threading
 from settings import *
 import subprocess
 from time import sleep, time
+from struct import unpack
 
 class MigrationHandler(threading.Thread):
     def __init__(self, listen_endpoint: tuple):
@@ -98,12 +99,21 @@ def continuous_test(host, port, test_duration=300):
     while time() - start < test_duration:
         try:
             while time() - start < test_duration:
-                message = str(last_ack + 1)
+                message = "https://www.wikipedia.org/"
                 client_socket.send(message.encode('utf-8'))
 
-                data = client_socket.recv(1024)
+                bs = client_socket.recv(8)
+                (length,) = unpack('>Q', bs)
+                data = b''
+                while len(data) < length:
+                    # doing it in batches is generally better than trying
+                    # to do it all in one go, so I believe.
+                    to_read = length - len(data)
+                    data += client_socket.recv(
+                        4096 if to_read > 4096 else to_read)
+
+                sleep(0.1)
                 try:
-                    last_ack = int(data.decode())
                     is_open = True
                     # print(f"Received: {data.decode('utf-8')}")
                 except:

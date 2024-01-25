@@ -1,6 +1,7 @@
 import socket
 import threading
 import requests
+from struct import pack
 
 class EchoThread(threading.Thread):
     def __init__(self, client_socket: socket.socket, client_address:str):
@@ -39,11 +40,16 @@ class NATThread(threading.Thread):
 
     def run(self):
         data = self.client_socket.recv(1024)
-        url = data.decode()
-        response = requests.get(url)
+        while data:
+            url = data.decode()
+            response = requests.get(url)
+            message = response.text.encode()
+            length = pack('>Q', len(message))
 
-        self.client_socket.sendall(response.text.encode())
+            self.client_socket.sendall(length)
+            self.client_socket.sendall(message)
 
+            data = self.client_socket.recv(1024)
         self.client_socket.close()
 
 def nat_server(host, port):
