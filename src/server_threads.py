@@ -175,7 +175,7 @@ class PollingHandler(threading.Thread):
             while True:
                 poller_socket, poller_address = dock_socket.accept()
                 print (f"==== polling request from {poller_address}:{self.listen_endpoint[1]}")
-                data = self.poller_socket.recv(1024)
+                data = poller_socket.recv(1024)
 
                 cpu_utilization = psutil.cpu_percent(interval=0.01)
                 throughput = calculate_network_throughput()
@@ -190,5 +190,5 @@ class PollingHandler(threading.Thread):
                 
         finally:
             dock_socket.close()
-            new_server = MigrationHandler(self.listen_endpoint)
+            new_server = PollingHandler(self.listen_endpoint)
             new_server.start()
