@@ -74,12 +74,11 @@ class Proxy:
             data = broker_socket.recv(1024)
             
             command = data.decode().strip().lower().split()
+            broker_socket.close()
 
             if (command[0] == "migrate"):
                 if len(command) > 1:
                     self.migrate(command[1])
                 else:
                     self.migrate(f'172.17.0.{self.my_number + 1}:8089')
-            else:
-                broker_socket.send("ERROR: invalid command".encode())
-            broker_socket.close()
+

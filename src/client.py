@@ -31,7 +31,7 @@ def tcp_client(host, port):
         print("Connection closed.")
 
 
-def continuous_test(host, port, test_duration=300):
+def continuous_test(host, port, migration, test_duration=300):
     last_ack = -1
     global client_socket
     client_socket.connect((host, port))
@@ -39,6 +39,8 @@ def continuous_test(host, port, test_duration=300):
     is_open = True
     start = time()
     process = run_script_in_background()
+    testing_migration_sender = TestingMigrationSenderThread(start=start, duration=300)
+    testing_migration_sender.start()
 
     while time() - start < test_duration:
         try:
@@ -91,6 +93,8 @@ if __name__ == "__main__":
     port = 8088
     choice = input('start? ').strip()
     if choice == '0':
-        continuous_test(host, port)
+        continuous_test(host, port, migration=False)
+    elif choice == '1':
+        continuous_test(host, port, migration=True)
     else:
         tcp_client(host, port)
