@@ -39,8 +39,9 @@ def continuous_test(host, port, migration, test_duration=300):
     is_open = True
     start = time()
     process = run_script_in_background()
-    testing_migration_sender = TestingMigrationSenderThread(start=start, duration=300)
-    testing_migration_sender.start()
+    if migration:
+        testing_migration_senderr = TestingMigrationSenderThread(start=start, duration=300)
+        testing_migration_senderr.start()
 
     while time() - start < test_duration:
         try:
