@@ -65,9 +65,9 @@ def run_script_in_background(script_path='../scripts/measure.sh'):
 
 
 class TestingMigrationSenderThread(threading.Thread):
-    def __init__(self, start, duration):
+    def __init__(self, start_time, duration):
         threading.Thread.__init__(self)
-        self.start = start
+        self.start_time = start_time
         self.duration = duration
 
     def run(self):
@@ -75,7 +75,7 @@ class TestingMigrationSenderThread(threading.Thread):
         counters = [0] * len(TESTING_MIGRATION_TIMES)
         is_done = 0
         while True:
-            right_now = time() - self.start
+            right_now = time() - self.start_time
 
             for i in range(len(TESTING_MIGRATION_TIMES) - 1, -1, -1):
                 if TESTING_MIGRATION_TIMES[i] < right_now and counters[i] == 0:

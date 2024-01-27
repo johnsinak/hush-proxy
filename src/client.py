@@ -37,15 +37,15 @@ def continuous_test(host, port, migration, test_duration=300):
     client_socket.connect((host, port))
     print(f"Connected to {host}:{port}")
     is_open = True
-    start = time()
+    start_time = time()
     process = run_script_in_background()
     if migration:
-        testing_migration_senderr = TestingMigrationSenderThread(start=start, duration=300)
+        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
         testing_migration_senderr.start()
 
-    while time() - start < test_duration:
+    while time() - start_time < test_duration:
         try:
-            while time() - start < test_duration:
+            while time() - start_time < test_duration:
                 message = "https://www.wikipedia.org/"
                 client_socket.send(message.encode('utf-8'))
 
@@ -80,7 +80,7 @@ def continuous_test(host, port, migration, test_duration=300):
                 client_socket.close()
                 is_open = False
                 print("Connection closed.")
-    print(f'test is done, total time was: {time() - start} secs')
+    print(f'test is done, total time was: {time() - start_time} secs')
     process.terminate()
 
 
