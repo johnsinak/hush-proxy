@@ -50,8 +50,8 @@ class Proxy:
             s.close()
             cli_sock.close()
             dest_sock.close()
-        client_addresses = []
-        client_sockets = []
+        # client_addresses = []
+        # client_sockets = []
         nat_sockets = []
 
     def run(self):
