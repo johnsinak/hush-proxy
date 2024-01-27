@@ -1,4 +1,4 @@
-from proxy import Proxy
+from pr import Proxy
 from settings import *
 import sys
 
