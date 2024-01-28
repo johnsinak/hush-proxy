@@ -82,7 +82,7 @@ def continuous_test(host, port, migration, test_duration=300):
     global client_socket
     client_socket.connect((host, port))
     print(f"Connected to {host}:{port}")
-    is_open = True
+    # is_open = True
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
     measure_thread.start()
@@ -107,26 +107,27 @@ def continuous_test(host, port, migration, test_duration=300):
                         4096 if to_read > 4096 else to_read)
 
                 sleep(0.1)
-                try:
-                    is_open = True
-                    # print(f"Received: {data.decode('utf-8')}")
-                except:
-                    print('Received: EOF')
-                    break
+                # try:
+                #     is_open = True
+                #     # print(f"Received: {data.decode('utf-8')}")
+                # except:
+                #     print('Received: EOF')
+                #     break
         except ConnectionRefusedError:
             print("Connection to the server failed. Make sure the server is running.")
 
         except ConnectionResetError:
             print('migrating...')
         
-        except:
-            print('the pipe is not ready yet, sleeping for 0.001 sec')
-            sleep(0.001)
-        finally:
-            if is_open:
-                client_socket.close()
-                is_open = False
-                print("Connection closed.")
+        except Exception as e:
+            print('the pipe is not ready yet, sleeping for 0.01 sec')
+            print(f'error: {e.with_traceback}')
+            sleep(0.01)
+        # finally:
+        #     if is_open:
+        #         client_socket.close()
+        #         is_open = False
+        #         print("Connection closed.")
     print(f'test is done, total time was: {time() - start_time} secs')
 
 
