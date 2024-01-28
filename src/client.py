@@ -89,33 +89,33 @@ def continuous_test(host, port, migration, test_duration=300):
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
         testing_migration_senderr.start()
-    i = 0
+    # i = 0
     while time() - start_time < test_duration:
         try:
-            print('here1')
+            # print('here1')
             while time() - start_time < test_duration:
-                print('here2')
+                # print('here2')
                 message = "https://www.wikipedia.org/"
                 client_socket.send(message.encode('utf-8'))
 
-                print('here3')
+                # print('here3')
                 bs = client_socket.recv(8)
-                print('here4')
+                # print('here4')
                 (length,) = unpack('>Q', bs)
                 data = b''
                 while len(data) < length:
                     # doing it in batches is generally better than trying
                     # to do it all in one go, so I believe.
                     to_read = length - len(data)
-                    print('here5')
+                    # print('here5')
                     data += client_socket.recv(
                         4096 if to_read > 4096 else to_read)
-                    print('here6')
+                    # print('here6')
                     
-                    if time() - start_time > 15 and i < 10:
-                        print('read 4096')
-                        print(f'lenght is {length}')
-                        i += 1
+                    # if time() - start_time > 15 and i < 10:
+                    #     print('read 4096')
+                    #     print(f'lenght is {length}')
+                    #     i += 1
 
                 sleep(0.1)
                 # try:
