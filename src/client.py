@@ -150,3 +150,4 @@ if __name__ == "__main__":
         continuous_test(host, port, migration=True)
     else:
         tcp_client(host, port)
+
