@@ -89,7 +89,7 @@ def continuous_test(host, port, migration, test_duration=300):
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
         testing_migration_senderr.start()
-
+    i = 0
     while time() - start_time < test_duration:
         try:
             while time() - start_time < test_duration:
@@ -105,6 +105,10 @@ def continuous_test(host, port, migration, test_duration=300):
                     to_read = length - len(data)
                     data += client_socket.recv(
                         4096 if to_read > 4096 else to_read)
+                    
+                    if time() - start_time > 15 and i < 10:
+                        print('read 4096')
+                        i += 1
 
                 sleep(0.1)
                 # try:

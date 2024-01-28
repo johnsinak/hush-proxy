@@ -40,12 +40,12 @@ class TrafficGetterThread(threading.Thread):
         while right_now < self.duration:
             try:
                 current = get_traffic(interface)
+                current_arr = current.split()
+                current_rx = int(current_arr[1])
             except:
                 sleep(0.1)
                 print('traffic getter sensed migration...')
                 continue
-            current_arr = current.split()
-            current_rx = int(current_arr[1])
 
             with open("throughput.txt", "a") as file:
                 file.write(str(current_rx - initial_rx) + "\n")
