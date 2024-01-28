@@ -1,7 +1,7 @@
 import subprocess
 import threading
 import socket
-from time import time
+from time import time, sleep
 
 from settings import *
 
@@ -15,6 +15,45 @@ def run_script_in_background(script_path='../scripts/measure.sh'):
     except Exception as e:
         print(f"Error running the shell script: {e}")
         return None
+
+def get_traffic(interface):
+    command = ["bash", "../scripts/get_traffic.sh", interface]
+    result = subprocess.run(command, capture_output=True, text=True)
+    return result.stdout.strip()
+
+class TrafficGetterThread(threading.Thread):
+    def __init__(self, start_time, duration):
+        threading.Thread.__init__(self)
+        self.start_time = start_time
+        self.duration = duration
+
+    def run(self):
+        interface = "wg0"
+        initial = get_traffic(interface)
+        initial_arr = initial.split()
+        initial_rx = int(initial_arr[1])
+
+        with open("throughput.txt", "w"):
+            pass
+
+        right_now = time() - self.start_time
+        while right_now < self.duration:
+            try:
+                current = get_traffic(interface)
+            except:
+                sleep(0.1)
+                print('traffic getter sensed migration...')
+                continue
+            current_arr = current.split()
+            current_rx = int(current_arr[1])
+
+            with open("throughput.txt", "a") as file:
+                file.write(str(current_rx - initial_rx) + "\n")
+
+            initial_rx = current_rx
+            right_now = time() - self.start_time
+            sleep(1)
+        print('traffic collection thread finished!')
 
 
 class TestingMigrationSenderThread(threading.Thread):

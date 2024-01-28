@@ -84,7 +84,8 @@ def continuous_test(host, port, migration, test_duration=300):
     print(f"Connected to {host}:{port}")
     is_open = True
     start_time = time()
-    process = run_script_in_background()
+    measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
+    measure_thread.start()
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
         testing_migration_senderr.start()
@@ -127,7 +128,6 @@ def continuous_test(host, port, migration, test_duration=300):
                 is_open = False
                 print("Connection closed.")
     print(f'test is done, total time was: {time() - start_time} secs')
-    process.terminate()
 
 
 if __name__ == "__main__":
