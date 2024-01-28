@@ -16,4 +16,4 @@ wg-quick up wg0
 
 cd src
 
-sudo python3 server.py 54.175.10.56:8000
+sudo python3 server.py 54.145.21.93:8000
