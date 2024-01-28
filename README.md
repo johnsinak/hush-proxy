@@ -7,7 +7,7 @@ Code for the flash proxy research.
         "PublicIpAddress": "54.145.21.93"
     },
     "proxy": {
-        "PublicIpAddress": "3.239.237.46"
+        "PublicIpAddress": "44.195.88.140"
     },
     "peer1": {
         "PublicIpAddress": "44.222.142.241"
