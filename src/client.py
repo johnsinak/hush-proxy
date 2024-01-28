@@ -121,7 +121,7 @@ def continuous_test(host, port, migration, test_duration=300):
         
         except Exception as e:
             print('the pipe is not ready yet, sleeping for 0.01 sec')
-            print(f'error: {e.with_traceback}')
+            print(f'error: {e.with_traceback()}')
             sleep(0.01)
         # finally:
         #     if is_open:
