@@ -26,28 +26,25 @@ class ForwardThread(threading.Thread):
             while data:
                 data = self.source_socket.recv(1024)
                 if data:
-                    try:
-                        self.destination_socket.sendall(data)
-                    except:
-                        print('connection closed')
-                        try:
-                            self.destination_socket.shutdown(socket.SHUT_WR)
-                        except:
-                            pass
-                        try:
-                            self.source_socket.shutdown(socket.SHUT_WR)
-                        except:
-                            pass
-                        break
+                    self.destination_socket.sendall(data)
                 else:
                     try:
-                        self.source_socket.shutdown(socket.SHUT_RD)
-                        self.destination_socket.shutdown(socket.SHUT_WR)
+                        self.source_socket.close()
+                        self.destination_socket.close()
                     except:
                         print('connection closed')
                         break
         except:
             print('connection closed')
+            try:
+                self.source_socket.close()
+            except:
+                pass
+            try:
+                self.destination_socket.close()
+            except:
+                pass
+            
 
 
 class ForwardingServerThread(threading.Thread):
