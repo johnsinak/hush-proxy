@@ -92,8 +92,9 @@ def continuous_test(host, port, migration, test_duration=300):
     i = 0
     while time() - start_time < test_duration:
         try:
+            print('here1')
             while time() - start_time < test_duration:
-                print('here')
+                print('here2')
                 message = "https://www.wikipedia.org/"
                 client_socket.send(message.encode('utf-8'))
 
@@ -109,6 +110,7 @@ def continuous_test(host, port, migration, test_duration=300):
                     
                     if time() - start_time > 15 and i < 10:
                         print('read 4096')
+                        print(f'lenght is {length}')
                         i += 1
 
                 sleep(0.1)
