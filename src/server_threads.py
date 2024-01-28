@@ -78,7 +78,7 @@ class ForwardingServerThread(threading.Thread):
                 way2.start()
         except Exception as e:
             print('ERROR: a fatal error has happened')
-            print(e.with_traceback())
+            print(e)
 
 
 class MigratingAgent(threading.Thread):
