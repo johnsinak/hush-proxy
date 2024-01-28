@@ -25,6 +25,7 @@ class ForwardThread(threading.Thread):
         try:
             while data:
                 data = self.source_socket.recv(1024)
+                print (f"==== {self.description}: {len(data)}")
                 if data:
                     self.destination_socket.sendall(data)
                 else:
