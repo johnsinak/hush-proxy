@@ -107,10 +107,11 @@ def continuous_test(host, port, migration, test_duration=300):
                     # doing it in batches is generally better than trying
                     # to do it all in one go, so I believe.
                     to_read = length - len(data)
-                    # print('here5')
-                    data += client_socket.recv(
+                    print('here5')
+                    new_data = client_socket.recv(
                         4096 if to_read > 4096 else to_read)
-                    # print('here6')
+                    data += new_data
+                    print(f'here6, got {len(data)}data')
                     
                     # if time() - start_time > 15 and i < 10:
                     #     print('read 4096')
