@@ -93,6 +93,7 @@ def continuous_test(host, port, migration, test_duration=300):
     while time() - start_time < test_duration:
         try:
             while time() - start_time < test_duration:
+                print('here')
                 message = "https://www.wikipedia.org/"
                 client_socket.send(message.encode('utf-8'))
 
