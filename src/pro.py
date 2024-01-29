@@ -45,7 +45,7 @@ class Proxy:
             address = client_addresses[i]
             cli_sock = client_sockets[i]
             dest_sock = nat_sockets[i]
-            # cli_sock.send('bye!'.encode())
+            cli_sock.send('bye!'.encode())
             cli_sock.close()
             dest_sock.close()
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
