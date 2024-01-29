@@ -1,4 +1,4 @@
-def log(message, pr=True):
+def log(message, pr=False):
     if pr:
         print(message)
     with open('log.txt', '+a') as f:
