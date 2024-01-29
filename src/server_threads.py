@@ -71,10 +71,12 @@ class ForwardingServerThread(threading.Thread):
                 log(f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
                 nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 nat_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
+                log(f"we connected to the nat socket")
                 way1 = ForwardThread(client_socket, nat_socket, "client -> server")
                 way2 = ForwardThread(nat_socket, client_socket, "server -> client")
                 way1.start()
                 way2.start()
+                log(f"both pipes are setup!")
         except Exception as e:
             log('ERROR: a fatal error has happened')
             log(str(e))
