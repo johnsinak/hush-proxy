@@ -45,12 +45,13 @@ class Proxy:
             address = client_addresses[i]
             cli_sock = client_sockets[i]
             dest_sock = nat_sockets[i]
+            # cli_sock.send('bye!'.encode())
+            cli_sock.close()
+            dest_sock.close()
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.connect((address[0], MIGRATION_PORT))
             s.sendall(f"{new_proxy_address}:{WIREGUARD_PORT}".encode())
             s.close()
-            cli_sock.close()
-            dest_sock.close()
         # client_addresses = []
         # client_sockets = []
         nat_sockets = []
