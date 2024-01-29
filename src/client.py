@@ -5,6 +5,8 @@ from utils import *
 import subprocess
 from time import sleep, time
 from struct import unpack
+from logger import log
+
 
 class MigrationHandler(threading.Thread):
     def __init__(self, listen_endpoint: tuple):
@@ -12,7 +14,7 @@ class MigrationHandler(threading.Thread):
         self.listen_endpoint = listen_endpoint
 
     def run(self):
-        print(f"==== client migration handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+        log(f"==== client migration handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
         dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
         dock_socket.listen(5)
@@ -21,7 +23,7 @@ class MigrationHandler(threading.Thread):
             mig_socket, mig_address = dock_socket.accept()
             print (f"==== migration request from {mig_address}:{self.listen_endpoint[1]}")
             data = mig_socket.recv(1024)
-            print(f"migration info: {data}")
+            log(f"migration info: {data}")
             new_endpoint = data.decode()
             new_endpoint_address, new_endpoint_port = new_endpoint.split(':')
             new_endpoint_port = int(new_endpoint_port) 
@@ -50,14 +52,14 @@ class MigrationHandler(threading.Thread):
             global client_socket, host, port
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((host, port))
-            print(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
+            log(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
 
 
 def tcp_client(host, port):
     try:
         global client_socket
         client_socket.connect((host, port))
-        print(f"Connected to {host}:{port}")
+        log(f"Connected to {host}:{port}")
 
         while True:
             message = input("Enter a message (or 'exit' to quit): ")
@@ -67,21 +69,21 @@ def tcp_client(host, port):
             client_socket.send(message.encode('utf-8'))
 
             data = client_socket.recv(1024)
-            print(f"Received from server: {data.decode('utf-8')}")
+            log(f"Received from server: {data.decode('utf-8')}")
 
     except ConnectionRefusedError:
-        print("Connection to the server failed. Make sure the server is running.")
+        log("Connection to the server failed. Make sure the server is running.")
 
     finally:
         client_socket.close()
-        print("Connection closed.")
+        log("Connection closed.")
 
 
 def continuous_test(host, port, migration, test_duration=300):
     last_ack = -1
     global client_socket
     client_socket.connect((host, port))
-    print(f"Connected to {host}:{port}")
+    log(f"Connected to {host}:{port}")
     # is_open = True
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
@@ -92,54 +94,54 @@ def continuous_test(host, port, migration, test_duration=300):
     i = 0
     while time() - start_time < test_duration:
         try:
-            # print('here1')
+            # log('here1')
             while time() - start_time < test_duration:
-                # print('here2')
+                # log('here2')
                 message = "https://www.wikipedia.org/"
                 client_socket.send(message.encode('utf-8'))
 
-                # print('here3')
+                # log('here3')
                 bs = client_socket.recv(8)
-                # print('here4')
+                # log('here4')
                 (length,) = unpack('>Q', bs)
                 data = b''
                 while len(data) < length:
                     # doing it in batches is generally better than trying
                     # to do it all in one go, so I believe.
                     to_read = length - len(data)
-                    # print('here5')
+                    # log('here5')
                     new_data = client_socket.recv(
                         4096 if to_read > 4096 else to_read)
                     data += new_data
-                    # print(f'here6, got {len(data)}data')
+                    # log(f'here6, got {len(data)}data')
                     
                     if time() - start_time > i * 20:
-                        print(f'here at {20*i}s, got {len(data)}data')
+                        log(f'here at {20*i}s, got {len(data)}data')
                         i += 1
 
                 sleep(0.1)
                 # try:
                 #     is_open = True
-                #     # print(f"Received: {data.decode('utf-8')}")
+                #     # log(f"Received: {data.decode('utf-8')}")
                 # except:
-                #     print('Received: EOF')
+                #     log('Received: EOF')
                 #     break
         except ConnectionRefusedError:
-            print("Connection to the server failed. Make sure the server is running.")
+            log("Connection to the server failed. Make sure the server is running.")
 
         except ConnectionResetError:
-            print('migrating...')
+            log('migrating...')
         
         except Exception as e:
-            print('the pipe is not ready yet, sleeping for 0.01 sec')
-            print(f'error: {e}')
+            log('the pipe is not ready yet, sleeping for 0.01 sec')
+            log(f'error: {e}')
             sleep(0.01)
         # finally:
         #     if is_open:
         #         client_socket.close()
         #         is_open = False
-        #         print("Connection closed.")
-    print(f'test is done, total time was: {time() - start_time} secs')
+        #         log("Connection closed.")
+    log(f'test is done, total time was: {time() - start_time} secs')
 
 
 if __name__ == "__main__":

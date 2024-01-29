@@ -5,6 +5,7 @@ from settings import WIREGUARD_CONFIG_LOCATION
 import psutil
 from time import sleep
 import json
+from logger import log
 
 client_addresses = []
 client_sockets = []
@@ -25,7 +26,7 @@ class ForwardThread(threading.Thread):
         try:
             while data:
                 data = self.source_socket.recv(1024)
-                print (f"==== {self.description}: {len(data)}")
+                log(f"==== {self.description}: {len(data)}")
                 if data:
                     self.destination_socket.sendall(data)
                 else:
@@ -33,10 +34,10 @@ class ForwardThread(threading.Thread):
                         self.source_socket.close()
                         self.destination_socket.close()
                     except:
-                        print('connection closed')
+                        log('connection closed')
                         break
         except:
-            print('connection closed')
+            log('connection closed')
             try:
                 self.source_socket.close()
             except:
@@ -61,13 +62,13 @@ class ForwardingServerThread(threading.Thread):
             dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
             dock_socket.listen(5)
-            print(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+            log(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
             while True:
                 client_socket, client_address = dock_socket.accept()
                 if client_address not in client_addresses:
                     client_addresses.append(client_address)
 
-                print (f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
+                log(f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
                 nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 nat_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
                 way1 = ForwardThread(client_socket, nat_socket, "client -> server")
@@ -75,8 +76,8 @@ class ForwardingServerThread(threading.Thread):
                 way1.start()
                 way2.start()
         except Exception as e:
-            print('ERROR: a fatal error has happened')
-            print(e)
+            log('ERROR: a fatal error has happened')
+            log(str(e))
 
 
 class MigratingAgent(threading.Thread):
@@ -87,7 +88,7 @@ class MigratingAgent(threading.Thread):
     def run(self):
         data = ' '
         full_file_data = b''
-        print (f"==== recieving migration data")
+        log(f"==== recieving migration data")
         while data:
             data = self.client_socket.recv(1024)
             if data:
@@ -95,11 +96,11 @@ class MigratingAgent(threading.Thread):
             else:
                 self.client_socket.shutdown(socket.SHUT_RD)
                 break
-        print (f"==== Done! full migration data:\n{full_file_data}")
+        log(f"==== Done! full migration data:\n{full_file_data}")
         migration_string = full_file_data.decode()
         peers = migration_string.split('Peer')
         if len(peers) == 1:
-            print("ERROR: Migrated data was empty!")
+            log("ERROR: Migrated data was empty!")
             return
         peers = peers[1:]
 
@@ -114,10 +115,10 @@ class MigratingAgent(threading.Thread):
                 if 'AllowedIPs' in line:
                     allowed_ips = line[line.find('=') + 1:].strip()
 
-            print(f'INFO: adding {public_key}|{allowed_ips}')
+            log(f'INFO: adding {public_key}|{allowed_ips}')
             subprocess.run(f'wg set wg0 peer "{public_key}" allowed-ips {allowed_ips}', shell=True)
             subprocess.run(f'ip -4 route add {allowed_ips} dev wg0', shell=True)
-            print("SUCCESS: migrated peer")
+            log("SUCCESS: migrated peer")
 
         # Update config file
         new_peers = ['[']
@@ -125,7 +126,7 @@ class MigratingAgent(threading.Thread):
         new_peers_string = '\n' + 'Peer'.join(new_peers)
         with open(WIREGUARD_CONFIG_LOCATION, 'a') as f:
             f.write(new_peers_string)
-        print("SUCCESS: updated config file")
+        log("SUCCESS: updated config file")
 
 
 class MigrationHandler(threading.Thread):
@@ -135,14 +136,14 @@ class MigrationHandler(threading.Thread):
 
     def run(self):
         try:
-            print(f"==== migration handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+            log(f"==== migration handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
             dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
             dock_socket.listen(5)
             
             while True:
                 client_socket, client_address = dock_socket.accept()
-                print (f"==== migration request from {client_address}:{self.listen_endpoint[1]}")
+                log(f"==== migration request from {client_address}:{self.listen_endpoint[1]}")
                 agent = MigratingAgent(client_socket)
                 agent.start()
         finally:
@@ -166,14 +167,14 @@ class PollingHandler(threading.Thread):
 
     def run(self):
         try:
-            print(f"==== polling handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+            log(f"==== polling handler listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
             dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
             dock_socket.listen(5)
             
             while True:
                 poller_socket, poller_address = dock_socket.accept()
-                print (f"==== polling request from {poller_address}:{self.listen_endpoint[1]}")
+                log(f"==== polling request from {poller_address}:{self.listen_endpoint[1]}")
                 data = poller_socket.recv(1024)
 
                 cpu_utilization = psutil.cpu_percent(interval=0.01)

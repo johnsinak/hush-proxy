@@ -1,6 +1,7 @@
 from server_threads import *
 from settings import *
 import requests
+from logger import log
 
 def get_public_ip():
     try:
@@ -9,10 +10,10 @@ def get_public_ip():
             public_ip = response.json()['origin']
             return public_ip
         else:
-            print(f"Failed to retrieve public IP. Status code: {response.status_code}")
+            log(f"Failed to retrieve public IP. Status code: {response.status_code}")
 
     except requests.RequestException as e:
-        print(f"Request error: {e}")
+        log(f"Request error: {e}")
 
     return None
 
@@ -39,7 +40,7 @@ class Proxy:
         s.connect((new_proxy_address, new_proxy_socket))
         s.sendall(data)
 
-        print(f'sending migration notice to {len(client_addresses)} clients')
+        log(f'sending migration notice to {len(client_addresses)} clients')
         for i in range(len(client_addresses)):
             address = client_addresses[i]
             cli_sock = client_sockets[i]
@@ -56,7 +57,7 @@ class Proxy:
 
     def run(self):
         ip = get_public_ip()
-        print(f'my endpoint is: {ip}:51820')
+        log(f'my endpoint is: {ip}:51820')
 
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)
