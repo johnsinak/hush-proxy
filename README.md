@@ -12,4 +12,7 @@ Code for the flash proxy research.
     "peer1": {
         "PublicIpAddress": "34.236.190.125"
     }
+    "main control": {
+        "PublicIpAddress": "44.197.203.24"
+    }
 }

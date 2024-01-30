@@ -84,6 +84,7 @@ class BEEGThread(threading.Thread):
                 f.seek(client_loc)
                 data = f.read(chunk_size)
 
+            print(len(data))
             length = pack('>Q', len(data))
 
             self.client_socket.sendall(length)
