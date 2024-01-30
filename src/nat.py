@@ -53,7 +53,20 @@ def nat_server_with_bulk_downloads(host, port, beeg_file_path):
 if __name__ == "__main__":
     host = "0.0.0.0"
     port = 8000
+    beeg_file_path = '../../random.img'
     pub_ip = get_public_ip()
     print(f"Nat server is listening on {pub_ip}:{port}")
 
-    nat_server(host, port)
+    choice = int(input('input 0 for echo, 1 for wikipedia, 2 for beeg file: ').strip())
+
+    if choice == 0:
+        print('echo server...', end=' ')
+        echo_server(host, port)
+    elif choice == 1:
+        print('nat server...', end=' ')
+        nat_server(host, port)
+    elif choice == 2:
+        print('beeg server...', end=' ')
+        nat_server_with_bulk_downloads(host, port, beeg_file_path)
+    else:
+        print('incorrect choice!')
