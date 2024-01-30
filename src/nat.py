@@ -46,7 +46,7 @@ def nat_server_with_bulk_downloads(host, port, beeg_file_path):
         client_socket, client_address = nat_socket.accept()
         print(f"Accepted connection from {client_address}")
 
-        thr = BEEGThread(client_socket, client_address)
+        thr = BEEGThread(client_socket, client_address, beeg_file_path)
         thr.start()
 
 
