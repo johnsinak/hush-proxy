@@ -79,12 +79,10 @@ def tcp_client(host, port):
         log("Connection closed.")
 
 
-def continuous_test(host, port, migration, test_duration=300):
-    last_ack = -1
+def efficacy_test_bulk_download(host, port, migration, test_duration=300):
     global client_socket
     client_socket.connect((host, port))
     log(f"Connected to {host}:{port}")
-    # is_open = True
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
     measure_thread.start()
@@ -92,40 +90,27 @@ def continuous_test(host, port, migration, test_duration=300):
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
         testing_migration_senderr.start()
     i = 0
+    amount_of_data_gathered = 0
     while time() - start_time < test_duration:
         try:
-            # log('here1')
             while time() - start_time < test_duration:
-                # log('here2')
-                message = "https://www.wikipedia.org/"
+                message = f"BEEGMode {amount_of_data_gathered}"
                 client_socket.send(message.encode('utf-8'))
-
-                # log('here3')
                 bs = client_socket.recv(8)
-                # log('here4')
                 (length,) = unpack('>Q', bs)
                 data = b''
                 while len(data) < length:
-                    # doing it in batches is generally better than trying
-                    # to do it all in one go, so I believe.
                     to_read = length - len(data)
-                    # log('here5')
                     new_data = client_socket.recv(
                         4096 if to_read > 4096 else to_read)
                     data += new_data
-                    # log(f'here6, got {len(data)}data')
+                    amount_of_data_gathered += len(new_data)
                     
-                    if time() - start_time > i * 20:
-                        log(f'here at {20*i}s, got {len(data)}data')
+                    if time() - start_time > i * 5:
+                        log(f'here at {5*i}s, got {len(data)}data', pr=True)
                         i += 1
-
-                sleep(0.1)
-                # try:
-                #     is_open = True
-                #     # log(f"Received: {data.decode('utf-8')}")
-                # except:
-                #     log('Received: EOF')
-                #     break
+                # Note: We might have to add this back later
+                # sleep(0.1)
         except ConnectionRefusedError:
             log("Connection to the server failed. Make sure the server is running.")
 
@@ -136,17 +121,55 @@ def continuous_test(host, port, migration, test_duration=300):
             log('the pipe is not ready yet, sleeping for 0.01 sec')
             log(f'error: {e}')
             sleep(0.01)
-        # finally:
-        #     if is_open:
-        #         client_socket.close()
-        #         is_open = False
-        #         log("Connection closed.")
+    log(f'test is done, total time was: {time() - start_time} secs')
+
+
+def efficacy_test_wikipedia(host, port, migration, test_duration=300):
+    last_ack = -1
+    global client_socket
+    client_socket.connect((host, port))
+    log(f"Connected to {host}:{port}")
+    start_time = time()
+    measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
+    measure_thread.start()
+    if migration:
+        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
+        testing_migration_senderr.start()
+    i = 0
+    while time() - start_time < test_duration:
+        try:
+            while time() - start_time < test_duration:
+                message = "https://www.wikipedia.org/"
+                client_socket.send(message.encode('utf-8'))
+                bs = client_socket.recv(8)
+                (length,) = unpack('>Q', bs)
+                data = b''
+                while len(data) < length:
+                    to_read = length - len(data)
+                    new_data = client_socket.recv(
+                        4096 if to_read > 4096 else to_read)
+                    data += new_data
+                    
+                    if time() - start_time > i * 20:
+                        log(f'here at {20*i}s, got {len(data)}data')
+                        i += 1
+
+                sleep(0.1)
+        except ConnectionRefusedError:
+            log("Connection to the server failed. Make sure the server is running.")
+
+        except ConnectionResetError:
+            log('migrating...')
+        
+        except Exception as e:
+            log('the pipe is not ready yet, sleeping for 0.01 sec')
+            log(f'error: {e}')
+            sleep(0.01)
     log(f'test is done, total time was: {time() - start_time} secs')
 
 
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #TODO: fix this
     migration_endpoint = ("10.27.0.2", 8089)
     handler = MigrationHandler(listen_endpoint=migration_endpoint)
     handler.start()
@@ -154,9 +177,13 @@ if __name__ == "__main__":
     port = 8088
     choice = input('start? ').strip()
     if choice == '0':
-        continuous_test(host, port, migration=False)
+        efficacy_test_wikipedia(host, port, migration=False)
     elif choice == '1':
-        continuous_test(host, port, migration=True)
+        efficacy_test_wikipedia(host, port, migration=True)
+    elif choice == '2':
+        efficacy_test_bulk_download(host, port, migration=False)
+    elif choice == '3':
+        efficacy_test_bulk_download(host, port, migration=True)
     else:
         tcp_client(host, port)
 
