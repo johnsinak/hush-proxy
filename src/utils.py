@@ -43,8 +43,10 @@ class TrafficGetterThread(threading.Thread):
                 current = get_traffic(interface)
                 current_arr = current.split()
                 current_rx = int(current_arr[1])
+                if current_rx == 0:
+                    print('this thing was zero!')
             except:
-                sleep(0.1)
+                sleep(0.01)
                 log('traffic getter sensed migration...')
                 continue
 
