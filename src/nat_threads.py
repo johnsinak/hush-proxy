@@ -67,6 +67,7 @@ class BEEGThread(threading.Thread):
 
     def run(self):
         beeg_file_size = os.path.getsize(self.beeg_file_path)
+        print(f'file size: {beeg_file_size}')
         chunk_size = 20 * (10^6) # request sizes
         data = self.client_socket.recv(1024)
         while data:
@@ -82,6 +83,7 @@ class BEEGThread(threading.Thread):
             
             with open(self.beeg_file_path, 'rb') as f:
                 f.seek(client_loc)
+                print(f'chunk_size: {chunk_size}')
                 data = f.read(chunk_size)
 
             print(len(data))

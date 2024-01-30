@@ -106,7 +106,7 @@ def efficacy_test_bulk_download(host, port, migration, test_duration=300):
                     data += new_data
                     amount_of_data_gathered += len(new_data)
                     
-                    if time() - start_time > 20 * 5:
+                    if time() - start_time > i * 20:
                         log(f'here at {20*i}s, got {len(data)}data', pr=True)
                         i += 1
                 # Note: We might have to add this back later
