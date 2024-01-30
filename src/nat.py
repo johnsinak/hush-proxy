@@ -53,7 +53,8 @@ def nat_server_with_bulk_downloads(host, port, beeg_file_path):
 if __name__ == "__main__":
     host = "0.0.0.0"
     port = 8000
-    beeg_file_path = '../../random.img'
+    beeg_file_path = 'random.img'
+    print(os.path.exists(beeg_file_path))
     pub_ip = get_public_ip()
     print(f"Nat server is listening on {pub_ip}:{port}")
 
