@@ -175,7 +175,7 @@ if __name__ == "__main__":
     handler.start()
     host = '10.27.0.20'
     port = 8088
-    choice = input('start? ').strip()
+    choice = input('the format is False - True. \n0 and 1 for wiki, 2 and 3 for bulk.\nstart? ').strip()
     if choice == '0':
         efficacy_test_wikipedia(host, port, migration=False)
     elif choice == '1':
