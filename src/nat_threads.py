@@ -4,6 +4,7 @@ import socket
 import requests
 import os
 from time import time
+import redis
 
 
 def get_public_ip():
@@ -86,6 +87,42 @@ class BEEGThread(threading.Thread):
             with open(self.beeg_file_path, 'rb') as f:
                 f.seek(client_loc)
                 data = f.read(chunk_size)
+
+            length = pack('>Q', len(data))
+
+            self.client_socket.sendall(length)
+            self.client_socket.sendall(data)
+            # if time() - start_time > i * 2:
+            #     print(f'{int(time() - start_time)}s:send {len(data)} size file')
+            #     i += 1
+
+            data = self.client_socket.recv(1024)
+        self.client_socket.close()
+
+
+class KVThread(threading.Thread):
+    def __init__(self, client_socket: socket.socket, client_address:str):
+        threading.Thread.__init__(self)
+        self.client_socket = client_socket
+        self.client_address = client_address
+
+    def run(self):
+        key = 'testing_key'
+        redis_client = redis.StrictRedis(
+            host='3.80.71.88', 
+            port=6379, 
+            password='foobared', 
+            decode_responses=True
+        )
+        redis_client.set(key, '0833a59570177bc10f98bcfcd24e2c977c33262125319d44ff88fa42cb83534eabfc9ea63e8d7f324d3331af204ff00410cc5d77a3a494c64b2e59290960c2ddeab78525d8a3af9204d8fde813affbaf')
+
+        data = self.client_socket.recv(1024)
+        start_time = time()
+        i = 0
+        while data:
+            client_request = data.decode()
+            
+            data = redis_client.get(key).encode()
 
             length = pack('>Q', len(data))
 

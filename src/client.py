@@ -170,6 +170,50 @@ def efficacy_test_wikipedia(host, port, migration, test_duration=300):
     log(f'test is done, total time was: {time() - start_time} secs')
 
 
+def efficacy_test_kv_store(host, port, migration, test_duration=300):
+    last_ack = -1
+    global client_socket
+    client_socket.connect((host, port))
+    log(f"Connected to {host}:{port}")
+    start_time = time()
+    measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
+    measure_thread.start()
+    if migration:
+        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
+        testing_migration_senderr.start()
+    i = 0
+    while time() - start_time < test_duration:
+        try:
+            while time() - start_time < test_duration:
+                message = "GET testing_key"
+                client_socket.send(message.encode('utf-8'))
+                bs = client_socket.recv(8)
+                (length,) = unpack('>Q', bs)
+                data = b''
+                while len(data) < length:
+                    to_read = length - len(data)
+                    new_data = client_socket.recv(
+                        4096 if to_read > 4096 else to_read)
+                    data += new_data
+                    
+                    if time() - start_time > i * 20:
+                        log(f'here at {20*i}s, got {len(data)}data')
+                        i += 1
+
+                sleep(0.1)
+        except ConnectionRefusedError:
+            log("Connection to the server failed. Make sure the server is running.")
+
+        except ConnectionResetError:
+            log('migrating...')
+        
+        except Exception as e:
+            log('the pipe is not ready yet, sleeping for 0.01 sec')
+            log(f'error: {e}')
+            sleep(0.01)
+    log(f'test is done, total time was: {time() - start_time} secs', pr=True)
+
+
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     migration_endpoint = ("10.27.0.2", 8089)
@@ -177,7 +221,7 @@ if __name__ == "__main__":
     handler.start()
     host = '10.27.0.20'
     port = 8088
-    choice = input('the format is False - True. \n0 and 1 for wiki, 2 and 3 for bulk.\nstart? ').strip()
+    choice = input('the format is False: no mig - True: with mig. \n0 and 1 for wiki, 2 and 3 for bulk, 4 and 5 for kv.\nstart? ').strip()
     if choice == '0':
         efficacy_test_wikipedia(host, port, migration=False)
     elif choice == '1':
@@ -186,6 +230,9 @@ if __name__ == "__main__":
         efficacy_test_bulk_download(host, port, migration=False)
     elif choice == '3':
         efficacy_test_bulk_download(host, port, migration=True)
+    elif choice == '4':
+        efficacy_test_kv_store(host, port, migration=False)
+    elif choice == '5':
+        efficacy_test_kv_store(host, port, migration=True)
     else:
         tcp_client(host, port)
-

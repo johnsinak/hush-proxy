@@ -50,6 +50,21 @@ def nat_server_with_bulk_downloads(host, port, beeg_file_path):
         thr.start()
 
 
+def nat_server_with_kv_store(host, port):
+    nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    nat_socket.bind((host, port))
+    nat_socket.listen(5)
+
+    print('going kv')
+
+    while True:
+        client_socket, client_address = nat_socket.accept()
+        print(f"Accepted connection from {client_address}")
+
+        thr = KVThread(client_socket, client_address)
+        thr.start()
+
+
 if __name__ == "__main__":
     host = "0.0.0.0"
     port = 8000
@@ -58,7 +73,7 @@ if __name__ == "__main__":
     pub_ip = get_public_ip()
     print(f"Nat server is listening on {pub_ip}:{port}")
 
-    choice = int(input('input 0 for echo, 1 for wikipedia, 2 for beeg file: ').strip())
+    choice = int(input('input 0 for echo, 1 for wikipedia, 2 for beeg file, 3 for kv: ').strip())
 
     if choice == 0:
         print('echo server...', end=' ')
@@ -69,5 +84,8 @@ if __name__ == "__main__":
     elif choice == 2:
         print('beeg server...', end=' ')
         nat_server_with_bulk_downloads(host, port, beeg_file_path)
+    elif choice == 3:
+        print('kv server...', end=' ')
+        nat_server_with_kv_store(host, port)
     else:
         print('incorrect choice!')
