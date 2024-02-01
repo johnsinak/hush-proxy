@@ -1,6 +1,7 @@
 import subprocess
 import threading
 import socket
+import psutil
 from time import time, sleep
 
 from settings import *
@@ -21,6 +22,18 @@ def get_traffic(interface):
     command = ["bash", "../scripts/get_traffic.sh", interface]
     result = subprocess.run(command, capture_output=True, text=True)
     return result.stdout.strip()
+
+def get_traffic_python(interface):
+    initial_stats = psutil.net_io_counters(pernic=True)[interface]
+    time.sleep(1)  # Wait for 1 second
+    # Get the current network statistics after 1 second
+    current_stats = psutil.net_io_counters(pernic=True)[interface]
+
+    # Calculate throughput in bytes per second
+    bytes_per_second_in = current_stats.bytes_recv - initial_stats.bytes_recv
+    bytes_per_second_out = current_stats.bytes_sent - initial_stats.bytes_sent
+    return bytes_per_second_in, bytes_per_second_out
+
 
 class TrafficGetterThread(threading.Thread):
     def __init__(self, start_time, duration):
@@ -56,6 +69,42 @@ class TrafficGetterThread(threading.Thread):
             initial_rx = current_rx
             right_now = time() - self.start_time
             sleep(1)
+        log('traffic collection thread finished!')
+
+
+class TrafficMeasurementPythonThread(threading.Thread):
+    def __init__(self, start_time, duration):
+        threading.Thread.__init__(self)
+        self.start_time = start_time
+        self.duration = duration
+
+    def run(self):
+        interface = "wg0"
+
+        with open("throughput_p_i.txt", "w"):
+            pass
+            
+        with open("throughput_p_o.txt", "w"):
+            pass
+
+        old_stats = psutil.net_io_counters(pernic=True)[interface]
+        right_now = time() - self.start_time
+    
+        while right_now < self.duration:
+            time.sleep(1)
+            current_stats = psutil.net_io_counters(pernic=True)[interface]
+
+            bytes_per_second_in = current_stats.bytes_recv - old_stats.bytes_recv
+            bytes_per_second_out = current_stats.bytes_sent - old_stats.bytes_sent
+
+            with open("throughput_p_i.txt", "a") as file:
+                file.write(str(bytes_per_second_in) + "\n")
+            
+            with open("throughput_p_o.txt", "a") as file:
+                file.write(str(bytes_per_second_out) + "\n")
+
+            old_stats = current_stats
+            right_now = time() - self.start_time
         log('traffic collection thread finished!')
 
 
