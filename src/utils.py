@@ -25,7 +25,7 @@ def get_traffic(interface):
 
 def get_traffic_python(interface):
     initial_stats = psutil.net_io_counters(pernic=True)[interface]
-    time.sleep(1)  # Wait for 1 second
+    sleep(1)  # Wait for 1 second
     # Get the current network statistics after 1 second
     current_stats = psutil.net_io_counters(pernic=True)[interface]
 
@@ -91,7 +91,7 @@ class TrafficMeasurementPythonThread(threading.Thread):
         right_now = time() - self.start_time
     
         while right_now < self.duration:
-            time.sleep(1)
+            sleep(1)
             current_stats = psutil.net_io_counters(pernic=True)[interface]
 
             bytes_per_second_in = current_stats.bytes_recv - old_stats.bytes_recv
