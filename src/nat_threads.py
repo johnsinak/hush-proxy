@@ -115,14 +115,15 @@ class KVThread(threading.Thread):
             decode_responses=True
         )
         redis_client.set(key, '0833a59570177bc10f98bcfcd24e2c977c33262125319d44ff88fa42cb83534eabfc9ea63e8d7f324d3331af204ff00410cc5d77a3a494c64b2e59290960c2ddeab78525d8a3af9204d8fde813affbaf')
-
+        print('set the thing')
         data = self.client_socket.recv(1024)
         start_time = time()
         i = 0
         while data:
             client_request = data.decode()
-            
+            print('client sent req')
             data = redis_client.get(key).encode()
+            print(f'got val, len: {len(data)}')
 
             length = pack('>Q', len(data))
 
