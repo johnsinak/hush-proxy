@@ -68,7 +68,7 @@ class BEEGThread(threading.Thread):
 
     def run(self):
         beeg_file_size = os.path.getsize(self.beeg_file_path)
-        chunk_size = 20 * (10**6) # request sizes
+        chunk_size = 1 * (10**6) # request sizes
         data = self.client_socket.recv(1024)
         start_time = time()
         i = 0
@@ -92,7 +92,7 @@ class BEEGThread(threading.Thread):
             self.client_socket.sendall(length)
             self.client_socket.sendall(data)
             if time() - start_time > i * 2:
-                print(f'{time() - start_time}:send {length} size file')
+                print(f'{int(time() - start_time)}s:send {len(data)} size file')
                 i += 1
 
             data = self.client_socket.recv(1024)
