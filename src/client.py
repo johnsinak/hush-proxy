@@ -153,7 +153,7 @@ def efficacy_test_wikipedia(host, port, migration, test_duration=300):
                     data += new_data
                     
                     if time() - start_time > i * 20:
-                        log(f'here at {20*i}s, got {len(data)}data')
+                        log(f'here at {20*i}s, got {len(data)}data', pr=True)
                         i += 1
 
                 sleep(0.1)
@@ -195,9 +195,8 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
                     new_data = client_socket.recv(
                         4096 if to_read > 4096 else to_read)
                     data += new_data
-                    
                     if time() - start_time > i * 20:
-                        log(f'here at {20*i}s, got {len(data)}data')
+                        log(f'here at {20*i}s, got {len(data)}data', pr=True)
                         i += 1
 
                 sleep(0.1)
