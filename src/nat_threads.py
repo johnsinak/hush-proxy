@@ -3,6 +3,7 @@ from struct import pack
 import socket
 import requests
 import os
+from time import time
 
 
 def get_public_ip():
@@ -69,6 +70,8 @@ class BEEGThread(threading.Thread):
         beeg_file_size = os.path.getsize(self.beeg_file_path)
         chunk_size = 20 * (10**6) # request sizes
         data = self.client_socket.recv(1024)
+        start_time = time()
+        i = 0
         while data:
             client_request = data.decode().split()
             if len(client_request) < 2:
@@ -88,6 +91,9 @@ class BEEGThread(threading.Thread):
 
             self.client_socket.sendall(length)
             self.client_socket.sendall(data)
+            if time() - start_time > i * 2:
+                print(f'{time() - start_time}:send {length} size file')
+                i += 1
 
             data = self.client_socket.recv(1024)
         self.client_socket.close()
