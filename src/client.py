@@ -86,6 +86,8 @@ def efficacy_test_bulk_download(host, port, migration, test_duration=300):
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
     measure_thread.start()
+    measure_thread_python = TrafficMeasurementPythonThread(start_time=start_time, duration=300)
+    measure_thread_python.start()
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
         testing_migration_senderr.start()
