@@ -215,6 +215,7 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
 
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    #TODO: Read endpoint in somehow! maybe input the ID and calculate the shit
     migration_endpoint = ("10.27.0.2", 8089)
     handler = MigrationHandler(listen_endpoint=migration_endpoint)
     handler.start()
