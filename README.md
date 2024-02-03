@@ -20,5 +20,8 @@ Code for the flash proxy research.
     },
     "main proxy":{
         "PublicIpAddress": "54.81.201.249"
+    },
+    "data collector":{
+        "PublicIpAddress": "18.212.144.129"
     }
 }
