@@ -5,10 +5,11 @@ from tqdm import tqdm
 
 server_ip = TESTING_MIGRATION_DESTS[0]
 peers_with_publickeys = []
+number_of_peers = 120
 
 # peer template needs: num1.num2 private_key server_endpoint
 
-for peer_number in tqdm(range(3,1100)):
+for peer_number in tqdm(range(3,number_of_peers)):
     folder = f'key_store/peer{peer_number}/'
     try:
         os.system(f'rm -rf {folder}')
