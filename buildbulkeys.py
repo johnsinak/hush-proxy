@@ -24,7 +24,7 @@ for peer_number in range(3,5000):
     with open(f'./templates/singlepeer_for_server_template.txt') as f:
         peer_template = f.read()
 
-    peers_with_publickeys.append(peer_template.format(publickey))
+    peers_with_publickeys.append(peer_template.format(publickey, num1))
 
     with open('./templates/peertemplate.txt') as f:
         template = f.read()
