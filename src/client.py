@@ -56,9 +56,12 @@ class MigrationHandler(threading.Thread):
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((host, port))
             log(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
-            with open(MIGRATION_DURATION_LOG_PATH, 'a+') as f:
-                f.write(str(time() - start_time))
-                f.write('\n')
+            # with open(MIGRATION_DURATION_LOG_PATH, 'a+') as f:
+            #     f.write(str(time() - start_time))
+            #     f.write('\n')
+            url = f'http://{CONTROLLER_IP_ADDRESS}:8000/assignments/postavgclient'
+            data = {"avg": time() - start_time}
+            response = requests.post(url, json=data)
 
 
 def tcp_client(host, port):
@@ -226,8 +229,8 @@ def mass_test_simple_client(host, port, test_duration=450):
     client_socket.connect((host, port))
     log(f"Connected to {host}:{port}", pr=True)
     start_time = time()
-    testing_data_sender = TestingDataSenderThread(start_time=start_time, duration=test_duration)
-    testing_data_sender.start()
+    # testing_data_sender = TestingDataSenderThread(start_time=start_time, duration=test_duration)
+    # testing_data_sender.start()
     i = 0
     while time() - start_time < test_duration:
         try:
