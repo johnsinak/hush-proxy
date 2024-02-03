@@ -11,10 +11,12 @@ def get_public_ip():
             public_ip = response.json()['origin']
             return public_ip
         else:
-            log(f"Failed to retrieve public IP. Status code: {response.status_code}")
+            # log(f"Failed to retrieve public IP. Status code: {response.status_code}")
+            pass
 
     except requests.RequestException as e:
-        log(f"Request error: {e}")
+        # log(f"Request error: {e}")
+        pass
 
     return None
 
@@ -42,7 +44,8 @@ class Proxy:
         s.connect((new_proxy_address, new_proxy_socket))
         s.sendall(data)
 
-        log(f'sending migration notice to {len(client_addresses)} clients', pr=True)
+        print(f'sending migration notice to {len(client_addresses)} clients')
+
         for i in range(len(client_addresses)):
             address = client_addresses[i]
             cli_sock = client_sockets[i]
@@ -66,11 +69,11 @@ class Proxy:
         response = requests.post(url, json=data)
 
         if response.status_code == 200:
-            log(f'sent data successfully. val was: {migration_time}. Done here', pr=True)
+            print(f'sent data successfully. val was: {migration_time}. Done here')
 
     def run(self):
         ip = get_public_ip()
-        log(f'my endpoint is: {ip}:51820', pr=True)
+        print(f'my endpoint is: {ip}:51820')
 
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)
