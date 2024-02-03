@@ -1,9 +1,8 @@
 from settings import *
-from logger import log
 from time import time
 import socket
 
-log(f"==== test migration sender running...")
+print(f"==== test migration sender running...")
 input('start? ')
 start_time = time()
 print('starting')
@@ -15,7 +14,7 @@ while True:
     for i in range(len(TESTING_MIGRATION_TIMES) - 1, -1, -1):
         if TESTING_MIGRATION_TIMES[i] < right_now and counters[i] == 0:
             # TESTING_MIGRATION_DESTS
-            log(f'sending to {i} to migrate to {i+1}')
+            print(f'sending to {i} to migrate to {i+1}')
             ip_src = TESTING_MIGRATION_DESTS[i]
             ip_dest = TESTING_MIGRATION_DESTS[i+1]
 
@@ -29,4 +28,4 @@ while True:
             counters[i] = 1
             is_done += 1
     if is_done == len(TESTING_MIGRATION_TIMES):break
-log('migation work is done.')
+print('migation work is done.')
