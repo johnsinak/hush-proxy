@@ -6,6 +6,7 @@ import subprocess
 from time import sleep, time
 from struct import unpack
 from logger import log
+import sys
 
 
 class MigrationHandler(threading.Thread):
@@ -22,6 +23,8 @@ class MigrationHandler(threading.Thread):
         while True:
             mig_socket, mig_address = dock_socket.accept()
             print (f"==== migration request from {mig_address}:{self.listen_endpoint[1]}")
+            start_time = time()
+            
             data = mig_socket.recv(1024)
             log(f"migration info: {data}")
             new_endpoint = data.decode()
@@ -53,6 +56,8 @@ class MigrationHandler(threading.Thread):
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((host, port))
             log(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
+            with open(MIGRATION_DURATION_LOG_PATH, 'a+') as f:
+                f.write(str(time() - start_time))
 
 
 def tcp_client(host, port):
@@ -213,26 +218,77 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
     log(f'test is done, total time was: {time() - start_time} secs', pr=True)
 
 
+def mass_test_simple_client(host, port, test_duration=300):
+    last_ack = -1
+    global client_socket
+    client_socket.connect((host, port))
+    log(f"Connected to {host}:{port}")
+    start_time = time()
+    i = 0
+    while time() - start_time < test_duration:
+        try:
+            while time() - start_time < test_duration:
+                message = "https://www.wikipedia.org/"
+                client_socket.send(message.encode('utf-8'))
+                bs = client_socket.recv(8)
+                (length,) = unpack('>Q', bs)
+                data = b''
+                while len(data) < length:
+                    to_read = length - len(data)
+                    new_data = client_socket.recv(
+                        4096 if to_read > 4096 else to_read)
+                    data += new_data
+                    
+                    if time() - start_time > i * 20:
+                        log(f'here at {20*i}s, got {len(data)}data', pr=True)
+                        i += 1
+
+                sleep(0.5)
+        except ConnectionRefusedError:
+            log("Connection to the server failed. Make sure the server is running.")
+
+        except ConnectionResetError:
+            log('migrating...')
+        
+        except Exception as e:
+            log('the pipe is not ready yet, sleeping for 0.01 sec')
+            log(f'error: {e}')
+            sleep(0.01)
+    log(f'test is done, total time was: {time() - start_time} secs')
+
+
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     #TODO: Read endpoint in somehow! maybe input the ID and calculate the shit
-    migration_endpoint = ("10.27.0.2", 8089)
-    handler = MigrationHandler(listen_endpoint=migration_endpoint)
-    handler.start()
-    host = '10.27.0.20'
-    port = 8088
-    choice = input('the format is False: no mig - True: with mig. \n0 and 1 for wiki, 2 and 3 for bulk, 4 and 5 for kv.\nstart? ').strip()
-    if choice == '0':
-        efficacy_test_wikipedia(host, port, migration=False)
-    elif choice == '1':
-        efficacy_test_wikipedia(host, port, migration=True)
-    elif choice == '2':
-        efficacy_test_bulk_download(host, port, migration=False)
-    elif choice == '3':
-        efficacy_test_bulk_download(host, port, migration=True)
-    elif choice == '4':
-        efficacy_test_kv_store(host, port, migration=False)
-    elif choice == '5':
-        efficacy_test_kv_store(host, port, migration=True)
+    if len(sys.argv) > 1:
+        my_id = int(sys.argv[1])
+        num1 = my_id//200
+        num2 = (my_id % 200) + 22
+        my_ip = f'10.27.{num1}.{num2}'
+        migration_endpoint = (my_ip, 8089)
+        handler = MigrationHandler(listen_endpoint=migration_endpoint)
+        handler.start()
+        host = '10.27.0.20'
+        port = 8088
+        mass_test_simple_client(host, port, migration=False)
     else:
-        tcp_client(host, port)
+        migration_endpoint = ("10.27.0.2", 8089)
+        handler = MigrationHandler(listen_endpoint=migration_endpoint)
+        handler.start()
+        host = '10.27.0.20'
+        port = 8088
+        choice = input('the format is False: no mig - True: with mig. \n0 and 1 for wiki, 2 and 3 for bulk, 4 and 5 for kv.\nstart? ').strip()
+        if choice == '0':
+            efficacy_test_wikipedia(host, port, migration=False)
+        elif choice == '1':
+            efficacy_test_wikipedia(host, port, migration=True)
+        elif choice == '2':
+            efficacy_test_bulk_download(host, port, migration=False)
+        elif choice == '3':
+            efficacy_test_bulk_download(host, port, migration=True)
+        elif choice == '4':
+            efficacy_test_kv_store(host, port, migration=False)
+        elif choice == '5':
+            efficacy_test_kv_store(host, port, migration=True)
+        else:
+            tcp_client(host, port)

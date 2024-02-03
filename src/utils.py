@@ -139,3 +139,30 @@ class TestingMigrationSenderThread(threading.Thread):
                     is_done += 1
             if is_done == len(TESTING_MIGRATION_TIMES):break
         log('migation work is done.')
+
+
+class TestingMigrationSenderThread(threading.Thread):
+    def __init__(self, start_time, duration):
+        threading.Thread.__init__(self)
+        self.start_time = start_time
+        self.duration = duration
+
+    def run(self):
+        right_now = time() - self.start_time
+        while right_now < self.duration + 1:
+            right_now = time() - self.start_time
+            sleep(1)
+
+        log('test should be done.')
+        with open(MIGRATION_DURATION_LOG_PATH) as f:
+            lines = f.readlines()
+        
+        sum = 0
+        count = 0
+        for line in f.readlines():
+            if not line.strip(): break
+            sum += float(line.strip())
+            count += 1
+        avg_mig_time = sum / count
+
+        
