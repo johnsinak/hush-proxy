@@ -5,7 +5,7 @@ from tqdm import tqdm
 
 server_ip = TESTING_MIGRATION_DESTS[0]
 peers_with_publickeys = []
-number_of_peers = 240
+number_of_peers = 1050
 
 # peer template needs: num1.num2 private_key server_endpoint
 
