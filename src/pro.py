@@ -58,7 +58,7 @@ class Proxy:
         # client_sockets = []
         nat_sockets = []
         migration_time = time() - start_time
-        url = 'http://54.81.201.249:8000/assignments/postavgproxy'
+        url = f'http://{CONTROLLER_IP_ADDRESS}:8000/assignments/postavgproxy'
 
         data = {"avg": migration_time}
 

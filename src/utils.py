@@ -166,7 +166,7 @@ class TestingDataSenderThread(threading.Thread):
             count += 1
         avg_mig_time = sum / count
 
-        url = 'http://54.81.201.249:8000/assignments/postavgclient'
+        url = f'http://{CONTROLLER_IP_ADDRESS}:8000/assignments/postavgclient'
 
         data = {"avg": avg_mig_time}
 
