@@ -54,6 +54,7 @@ class Proxy:
             s.connect((address[0], MIGRATION_PORT))
             s.sendall(f"{new_proxy_address}:{WIREGUARD_PORT}".encode())
             s.close()
+            print(f'sent to {address}')
         # client_addresses = []
         # client_sockets = []
         nat_sockets = []
