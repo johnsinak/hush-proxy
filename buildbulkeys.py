@@ -7,7 +7,7 @@ peers_with_publickeys = []
 
 # peer template needs: num1.num2 private_key server_endpoint
 
-for peer_number in range(3,1100):
+for peer_number in range(3,5000):
     folder = f'key_store/peer{peer_number}/'
     try:
         os.system(f'rm -rf {folder}')
@@ -37,7 +37,7 @@ for peer_number in range(3,1100):
     with open(f'{folder}wg0.conf', 'w') as f:
         f.write(filetowrite)
     
-    if peer_number > 5: break
+    # if peer_number > 5: break
 
 with open('./templates/serverbase.txt') as f:
     server_base = f.read()

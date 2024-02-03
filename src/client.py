@@ -91,10 +91,10 @@ def efficacy_test_bulk_download(host, port, migration, test_duration=300):
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
     measure_thread.start()
-    measure_thread_python = TrafficMeasurementPythonThread(start_time=start_time, duration=300)
+    measure_thread_python = TrafficMeasurementPythonThread(start_time=start_time, duration=test_duration)
     measure_thread_python.start()
     if migration:
-        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
+        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=test_duration)
         testing_migration_senderr.start()
     i = 0
     amount_of_data_gathered = 0
@@ -137,10 +137,10 @@ def efficacy_test_wikipedia(host, port, migration, test_duration=300):
     client_socket.connect((host, port))
     log(f"Connected to {host}:{port}")
     start_time = time()
-    measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
+    measure_thread = TrafficGetterThread(start_time=start_time, duration=test_duration)
     measure_thread.start()
     if migration:
-        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
+        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=test_duration)
         testing_migration_senderr.start()
     i = 0
     while time() - start_time < test_duration:
@@ -181,10 +181,10 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
     client_socket.connect((host, port))
     log(f"Connected to {host}:{port}")
     start_time = time()
-    measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
+    measure_thread = TrafficGetterThread(start_time=start_time, duration=test_duration)
     measure_thread.start()
     if migration:
-        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=300)
+        testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=test_duration)
         testing_migration_senderr.start()
     i = 0
     while time() - start_time < test_duration:
@@ -218,12 +218,14 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
     log(f'test is done, total time was: {time() - start_time} secs', pr=True)
 
 
-def mass_test_simple_client(host, port, test_duration=300):
+def mass_test_simple_client(host, port, test_duration=120):
     last_ack = -1
     global client_socket
     client_socket.connect((host, port))
     log(f"Connected to {host}:{port}")
     start_time = time()
+    testing_data_sender = TestingDataSenderThread(start_time=start_time, duration=test_duration)
+    testing_data_sender.start()
     i = 0
     while time() - start_time < test_duration:
         try:
@@ -259,7 +261,6 @@ def mass_test_simple_client(host, port, test_duration=300):
 
 if __name__ == "__main__":
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    #TODO: Read endpoint in somehow! maybe input the ID and calculate the shit
     if len(sys.argv) > 1:
         my_id = int(sys.argv[1])
         num1 = my_id//200
@@ -270,7 +271,7 @@ if __name__ == "__main__":
         handler.start()
         host = '10.27.0.20'
         port = 8088
-        mass_test_simple_client(host, port, migration=False)
+        mass_test_simple_client(host, port)
     else:
         migration_endpoint = ("10.27.0.2", 8089)
         handler = MigrationHandler(listen_endpoint=migration_endpoint)

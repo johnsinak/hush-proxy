@@ -141,7 +141,7 @@ class TestingMigrationSenderThread(threading.Thread):
         log('migation work is done.')
 
 
-class TestingMigrationSenderThread(threading.Thread):
+class TestingDataSenderThread(threading.Thread):
     def __init__(self, start_time, duration):
         threading.Thread.__init__(self)
         self.start_time = start_time
