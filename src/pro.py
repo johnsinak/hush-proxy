@@ -2,6 +2,7 @@ from server_threads import *
 from settings import *
 import requests
 from logger import log
+from time import time
 
 def get_public_ip():
     try:
@@ -30,6 +31,7 @@ class Proxy:
         self.polling_endpoint = polling_endpoint
     
     def migrate(self, new_proxy_ip):
+        start_time = time()
         # migrate address
         global client_addresses, client_sockets, nat_sockets
         with open(WIREGUARD_CONFIG_LOCATION, "rb") as f:
@@ -55,6 +57,15 @@ class Proxy:
         # client_addresses = []
         # client_sockets = []
         nat_sockets = []
+        migration_time = time() - start_time
+        url = 'http://54.81.201.249:8000/assignments/postavgproxy'
+
+        data = {"avg": migration_time}
+
+        response = requests.post(url, json=data)
+
+        if response.status_code == 200:
+            log(f'sent data successfully. val was: {migration_time}. Done here', pr=True)
 
     def run(self):
         ip = get_public_ip()

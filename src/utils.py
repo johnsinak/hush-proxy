@@ -2,6 +2,7 @@ import subprocess
 import threading
 import socket
 import psutil
+import requests
 from time import time, sleep
 
 from settings import *
@@ -159,10 +160,18 @@ class TestingDataSenderThread(threading.Thread):
         
         sum = 0
         count = 0
-        for line in f.readlines():
+        for line in lines:
             if not line.strip(): break
             sum += float(line.strip())
             count += 1
         avg_mig_time = sum / count
 
+        url = 'http://54.81.201.249:8000/assignments/postavgclient'
+
+        data = {"avg": avg_mig_time}
+
+        response = requests.post(url, json=data)
+
+        if response.status_code == 200:
+            log('sent data successfully. Done here', pr=True)
         
