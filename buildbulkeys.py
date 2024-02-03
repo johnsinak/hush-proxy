@@ -1,13 +1,14 @@
 import subprocess
 from src.settings import *
 import os
+from tqdm import tqdm
 
 server_ip = TESTING_MIGRATION_DESTS[0]
 peers_with_publickeys = []
 
 # peer template needs: num1.num2 private_key server_endpoint
 
-for peer_number in range(3,5000):
+for peer_number in tqdm(range(3,1100)):
     folder = f'key_store/peer{peer_number}/'
     try:
         os.system(f'rm -rf {folder}')
@@ -21,6 +22,9 @@ for peer_number in range(3,5000):
     with open(f'{folder}publickey') as f:
         publickey = f.read().strip()
 
+    num1 = peer_number//200
+    num2 = (peer_number % 200) + 22
+
     with open(f'./templates/singlepeer_for_server_template.txt') as f:
         peer_template = f.read()
 
@@ -29,8 +33,7 @@ for peer_number in range(3,5000):
     with open('./templates/peertemplate.txt') as f:
         template = f.read()
     
-    num1 = peer_number//200
-    num2 = (peer_number % 200) + 22
+    
 
     filetowrite = template.format(num1,num2, private_key, server_ip)
     
