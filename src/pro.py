@@ -42,7 +42,7 @@ class Proxy:
         s.connect((new_proxy_address, new_proxy_socket))
         s.sendall(data)
 
-        log(f'sending migration notice to {len(client_addresses)} clients')
+        log(f'sending migration notice to {len(client_addresses)} clients', pr=True)
         for i in range(len(client_addresses)):
             address = client_addresses[i]
             cli_sock = client_sockets[i]
@@ -69,7 +69,7 @@ class Proxy:
 
     def run(self):
         ip = get_public_ip()
-        log(f'my endpoint is: {ip}:51820')
+        log(f'my endpoint is: {ip}:51820', pr=True)
 
         forwarding_server = ForwardingServerThread(self.wireguard_endpoint, self.nat_endpoint)
         migration_handler = MigrationHandler(self.migration_endpoint)

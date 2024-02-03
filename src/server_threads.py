@@ -61,13 +61,13 @@ class ForwardingServerThread(threading.Thread):
             dock_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             dock_socket.bind((self.listen_endpoint[0], self.listen_endpoint[1]))
             dock_socket.listen(5)
-            log(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}")
+            log(f"==== listening on {self.listen_endpoint[0]}:{self.listen_endpoint[1]}", pr=True)
             while True:
                 client_socket, client_address = dock_socket.accept()
                 if client_address not in client_addresses:
                     client_addresses.append(client_address)
 
-                log(f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}")
+                log(f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}", pr=True)
                 nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 nat_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
                 way1 = ForwardThread(client_socket, nat_socket, "client -> server")
