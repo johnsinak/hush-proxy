@@ -65,7 +65,7 @@ class ForwardingServerThread(threading.Thread):
                     client_addresses.append(client_address)
                     client_sockets.append(client_socket)
 
-                log(f"==== from {client_address}:{self.listen_endpoint[1]} to {self.forward_endpoint[0]}:{self.forward_endpoint[1]}", pr=True)
+                print(len(client_address))
                 nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 nat_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
                 nat_sockets.append(nat_socket)
