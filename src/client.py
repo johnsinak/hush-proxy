@@ -58,6 +58,7 @@ class MigrationHandler(threading.Thread):
             log(f"Connected to {new_endpoint_address}:{new_endpoint_port}")
             with open(MIGRATION_DURATION_LOG_PATH, 'a+') as f:
                 f.write(str(time() - start_time))
+                f.write('\n')
 
 
 def tcp_client(host, port):
@@ -258,6 +259,7 @@ def mass_test_simple_client(host, port, test_duration=120):
             log(f'error: {e}')
             sleep(0.01)
     log(f'test is done, total time was: {time() - start_time} secs')
+    sleep(10)
 
 
 if __name__ == "__main__":

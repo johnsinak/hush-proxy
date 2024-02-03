@@ -6,6 +6,7 @@ import socket
 log(f"==== test migration sender running...")
 input('start? ')
 start_time = time()
+print('starting')
 counters = [0] * len(TESTING_MIGRATION_TIMES)
 is_done = 0
 while True:
