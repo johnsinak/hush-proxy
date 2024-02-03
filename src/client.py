@@ -221,8 +221,9 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
 def mass_test_simple_client(host, port, test_duration=120):
     last_ack = -1
     global client_socket
+    print(f'trying to connect to ({host}, {port})')
     client_socket.connect((host, port))
-    log(f"Connected to {host}:{port}")
+    log(f"Connected to {host}:{port}", pr=True)
     start_time = time()
     testing_data_sender = TestingDataSenderThread(start_time=start_time, duration=test_duration)
     testing_data_sender.start()
