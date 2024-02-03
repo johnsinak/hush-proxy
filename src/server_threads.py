@@ -65,7 +65,7 @@ class ForwardingServerThread(threading.Thread):
                     client_addresses.append(client_address)
                     client_sockets.append(client_socket)
 
-                print(len(client_address))
+                print(len(client_addresses))
                 nat_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 nat_socket.connect((self.forward_endpoint[0], self.forward_endpoint[1]))
                 nat_sockets.append(nat_socket)
