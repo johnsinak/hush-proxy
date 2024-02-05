@@ -92,9 +92,9 @@ class BEEGThread(threading.Thread):
 
             self.client_socket.sendall(length)
             self.client_socket.sendall(data)
-            if time() - start_time > i * 5:
-                print(f'{int(time() - start_time)}s:send {len(data)} size file')
-                i += 1
+            # if time() - start_time > i * 5:
+            #     print(f'{int(time() - start_time)}s:send {len(data)} size file')
+            #     i += 1
 
             data = self.client_socket.recv(1024)
         self.client_socket.close()

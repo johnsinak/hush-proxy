@@ -88,13 +88,33 @@ class TrafficMeasurementPythonThread(threading.Thread):
         with open("throughput_p_o.txt", "w"):
             pass
 
-        old_stats = psutil.net_io_counters(pernic=True)[interface]
-        right_now = time() - self.start_time
+        # old_stats = psutil.net_io_counters(pernic=True)[interface]
+        # right_now = time() - self.start_time
     
-        while right_now < self.duration:
-            sleep(1)
-            current_stats = psutil.net_io_counters(pernic=True)[interface]
+        # while right_now < self.duration:
+        #     sleep(1)
+        #     current_stats = psutil.net_io_counters(pernic=True)[interface]
 
+        #     bytes_per_second_in = current_stats.bytes_recv - old_stats.bytes_recv
+        #     bytes_per_second_out = current_stats.bytes_sent - old_stats.bytes_sent
+
+        #     with open("throughput_p_i.txt", "a") as file:
+        #         file.write(str(bytes_per_second_in) + "\n")
+            
+        #     with open("throughput_p_o.txt", "a") as file:
+        #         file.write(str(bytes_per_second_out) + "\n")
+
+        #     old_stats = current_stats
+        #     right_now = time() - self.start_time
+
+        old_stats = psutil.net_io_counters(pernic=True)[interface]
+        
+        while time() - self.start_time < self.duration:
+            try:
+                current_stats = psutil.net_io_counters(pernic=True)[interface]
+            except:
+                sleep(0.01)
+                continue
             bytes_per_second_in = current_stats.bytes_recv - old_stats.bytes_recv
             bytes_per_second_out = current_stats.bytes_sent - old_stats.bytes_sent
 
@@ -105,7 +125,9 @@ class TrafficMeasurementPythonThread(threading.Thread):
                 file.write(str(bytes_per_second_out) + "\n")
 
             old_stats = current_stats
-            right_now = time() - self.start_time
+            sleep(1)
+
+
         log('python-based traffic collection thread finished!', pr=True)
 
 
