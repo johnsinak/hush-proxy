@@ -95,8 +95,8 @@ def efficacy_test_bulk_download(host, port, migration, test_duration=300):
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=300)
     measure_thread.start()
-    measure_thread_python = TrafficMeasurementPythonThread(start_time=start_time, duration=test_duration)
-    measure_thread_python.start()
+    measure_thread_2 = TrafficMeasurementPythonThread(start_time=start_time, duration=test_duration)
+    measure_thread_2.start()
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=test_duration)
         testing_migration_senderr.start()
@@ -143,6 +143,8 @@ def efficacy_test_wikipedia(host, port, migration, test_duration=300):
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=test_duration)
     measure_thread.start()
+    measure_thread_2 = TrafficMeasurementPythonThread(start_time=start_time, duration=test_duration)
+    measure_thread_2.start()
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=test_duration)
         testing_migration_senderr.start()
@@ -187,6 +189,8 @@ def efficacy_test_kv_store(host, port, migration, test_duration=300):
     start_time = time()
     measure_thread = TrafficGetterThread(start_time=start_time, duration=test_duration)
     measure_thread.start()
+    measure_thread_2 = TrafficMeasurementPythonThread(start_time=start_time, duration=test_duration)
+    measure_thread_2.start()
     if migration:
         testing_migration_senderr = TestingMigrationSenderThread(start_time=start_time, duration=test_duration)
         testing_migration_senderr.start()
