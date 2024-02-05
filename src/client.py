@@ -112,6 +112,7 @@ def efficacy_test_bulk_download(host, port, migration, test_duration=300):
                 data = b''
                 while len(data) < length:
                     to_read = length - len(data)
+                    client_socket.settimeout(0.2)
                     new_data = client_socket.recv(
                         4096 if to_read > 4096 else to_read)
                     data += new_data
