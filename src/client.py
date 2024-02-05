@@ -59,9 +59,9 @@ class MigrationHandler(threading.Thread):
             # with open(MIGRATION_DURATION_LOG_PATH, 'a+') as f:
             #     f.write(str(time() - start_time))
             #     f.write('\n')
-            url = f'http://{CONTROLLER_IP_ADDRESS}:8000/assignments/postavgclient'
-            data = {"avg": time() - start_time}
-            response = requests.post(url, json=data)
+            # url = f'http://{CONTROLLER_IP_ADDRESS}:8000/assignments/postavgclient'
+            # data = {"avg": time() - start_time}
+            # response = requests.post(url, json=data)
 
 
 def tcp_client(host, port):
@@ -178,7 +178,7 @@ def efficacy_test_wikipedia(host, port, migration, test_duration=300):
             log('the pipe is not ready yet, sleeping for 0.01 sec')
             log(f'error: {e}')
             sleep(0.01)
-    log(f'test is done, total time was: {time() - start_time} secs')
+    log(f'test is done, total time was: {time() - start_time} secs', pr=True)
 
 
 def efficacy_test_kv_store(host, port, migration, test_duration=300):

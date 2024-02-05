@@ -66,10 +66,10 @@ class Proxy:
 
         data = {"avg": migration_time}
 
-        response = requests.post(url, json=data)
+        # response = requests.post(url, json=data)
 
-        if response.status_code == 200:
-            print(f'sent data successfully. val was: {migration_time}. Done here')
+        # if response.status_code == 200:
+        #     print(f'sent data successfully. val was: {migration_time}. Done here')
 
     def run(self):
         ip = get_public_ip()

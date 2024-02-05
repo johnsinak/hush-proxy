@@ -106,7 +106,7 @@ class TrafficMeasurementPythonThread(threading.Thread):
 
             old_stats = current_stats
             right_now = time() - self.start_time
-        log('python-based traffic collection thread finished!')
+        log('python-based traffic collection thread finished!', pr=True)
 
 
 class TestingMigrationSenderThread(threading.Thread):
